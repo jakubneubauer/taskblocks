@@ -115,6 +115,16 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 	
+	Action _saveAsAction = new MyAction("Save As...") {
+		public void actionPerformed(ActionEvent e) {
+			File oldFile = _file;
+			_file = null;
+			if(!save()) {
+				_file = oldFile;
+			}
+		}
+	};
+	
 	Action _leftAction = new MyAction("Left", getImage("left.gif"), "Scrolls left") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.moveLeft();
@@ -295,6 +305,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menuFile.add(_loadFileAction).setAccelerator(getAcceleratorStroke('O'));
 		menuFile.add(new JSeparator());
 		menuFile.add(_saveAction).setAccelerator(getAcceleratorStroke('S'));
+		menuFile.add(_saveAsAction);
 		menuFile.add(new JSeparator());
 		menuFile.add(_closeFileAction).setAccelerator(getAcceleratorStroke('W'));
 		menu.add(menuFile);
