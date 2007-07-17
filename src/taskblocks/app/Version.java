@@ -12,7 +12,7 @@ public class Version {
 	static {
 		String ver ="unknown";
 		try {
-			InputStream versionResourceStream = ClassLoader.getSystemResourceAsStream("/taskblocks/version");
+			InputStream versionResourceStream = ClassLoader.getSystemResourceAsStream("taskblocks/version");
 			if(versionResourceStream != null) {
 				BufferedReader r = new BufferedReader(new InputStreamReader(versionResourceStream));
 				ver=r.readLine();
