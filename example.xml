@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><taskman>
+  <mans>
+    <man id="1" name="Jakub"/>
+    <man id="2" name="Michal"/>
+    <man id="3" name="Petr"/>
+    <man id="4" name="Jindra"/>
+    <man id="5" name="Honza"/>
+    <man id="6" name="Libor"/>
+  </mans>
+  <tasks>
+    <task duration="7" id="1" man="3" name="Mailer - mime types" start="13696"/>
+    <task duration="10" id="2" man="1" name="Server renaming" start="13720"/>
+    <task duration="12" id="3" man="4" name="protocol - import/export" start="13727"/>
+    <task duration="15" id="4" man="3" name="Scheduler GUI" start="13713">
+      <predecessors>
+        <predecessor pred="25"/>
+      </predecessors>
+    </task>
+    <task duration="9" id="5" man="1" name="refactor jobs" start="13752"/>
+    <task duration="15" id="6" man="5" name="Logger config GUI" start="13745"/>
+    <task duration="6" id="7" man="5" name="Welcome window" start="13703"/>
+    <task color="1" duration="13" id="8" man="5" name="Job submit GUI" start="13718">
+      <predecessors>
+        <predecessor pred="34"/>
+      </predecessors>
+    </task>
+    <task duration="4" id="9" man="2" name="Table with header filters - clean" start="13710"/>
+    <task duration="6" id="10" man="6" name="Job/Doc detail" start="13726"/>
+    <task duration="10" id="11" man="6" name="Config transfer" start="13759">
+      <predecessors>
+        <predecessor pred="16"/>
+      </predecessors>
+    </task>
+    <task duration="9" id="12" man="2" name="GUI locking" start="13714"/>
+    <task duration="4" id="13" man="4" name="protocol - reprint" start="13762"/>
+    <task duration="7" id="14" man="4" name="protocol - attribute queries" start="13707">
+      <predecessors>
+        <predecessor pred="18"/>
+      </predecessors>
+    </task>
+    <task duration="5" id="15" man="6" name="Job speed limit" start="13704"/>
+    <task duration="10" id="16" man="6" name="Import-export GUI" start="13745">
+      <predecessors>
+        <predecessor pred="3"/>
+      </predecessors>
+    </task>
+    <task duration="2" id="17" man="6" name="Title with user name" start="13700"/>
+    <task color="2" duration="7" id="18" man="4" name="Filter parser" start="13698"/>
+    <task duration="19" id="19" man="3" name="EMC Documentum" start="13748"/>
+    <task color="3" duration="5" id="20" man="1" name="Standalone library" start="13713"/>
+    <task duration="3" id="21" man="4" name="protocol - logs" start="13745"/>
+    <task duration="10" id="22" man="2" name="Workflow enhancements" start="13696"/>
+    <task duration="10" id="23" man="4" name="protocol - job submit" start="13748"/>
+    <task duration="2" id="24" man="4" name="Write interfaces" start="13696"/>
+    <task duration="8" id="25" man="1" name="Scheduler config -&gt; xml" start="13703"/>
+    <task color="4" duration="7" id="26" man="4" name="DB - attributes queries" start="13718">
+      <predecessors>
+        <predecessor pred="14"/>
+      </predecessors>
+    </task>
+    <task duration="5" id="27" man="6" name="GUI - renaming" start="13734">
+      <predecessors>
+        <predecessor pred="2"/>
+      </predecessors>
+    </task>
+    <task duration="6" id="28" man="5" name="Job reprint/forward GUI" start="13735">
+      <predecessors>
+        <predecessor pred="34"/>
+      </predecessors>
+    </task>
+    <task duration="10" id="29" man="3" name="RSD archive" start="13734"/>
+    <task duration="8" id="30" man="5" name="Log viewer" start="13766">
+      <predecessors>
+        <predecessor pred="21"/>
+      </predecessors>
+    </task>
+    <task duration="5" id="31" man="1" name="Server statistics -&gt; attributes" start="13696"/>
+    <task color="5" duration="12" id="32" man="1" name="Software lic" start="13734"/>
+    <task color="1" duration="11" id="33" man="6" name="Summary window GUI" start="13711">
+      <predecessors>
+        <predecessor pred="31"/>
+      </predecessors>
+    </task>
+    <task duration="5" id="34" man="5" name="Attr value table" start="13711"/>
+    <task duration="4" id="35" man="6" name="Event config -&gt; dialog" start="13696"/>
+    <task duration="5" id="36" man="5" name="Help" start="13696"/>
+    <task duration="31" id="37" man="2" name="Job table GUI" start="13727">
+      <predecessors>
+        <predecessor pred="26"/>
+      </predecessors>
+    </task>
+    <task duration="5" id="38" man="3" name="Scripting - completion" start="13705"/>
+  </tasks>
+</taskman>

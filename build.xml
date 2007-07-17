@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<!--
+     Task Blocks Build File
+-->
+
+<project name="Task Blocks" default="distr">
+  
+  <property name="appVersion" value="0.4"/>
+  <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
+	
+  <property name="appJar" value="taskblocks.jar"/>
+  <property name="macAppDir" value="distr/MacOS/taskblocks-${appVersion}"/>
+  <property name ="tarDir" value="taskblocks-${appVersion}"/>
+
+  <description>Build file for Task Blocks application</description>
+
+  <target name="archive" depends="clean">
+  	<copy todir="${tarDir}">
+  		<fileset dir=".">
+  			<include name="src/**/*"/>
+  			<include name="lib/**/*"/>
+  			<include name="build.xml"/>
+  			<exclude name="lib/junit.jar"/>
+  		</fileset>
+  	</copy>
+  	<tar destfile="${tarDir}.tgz" compression="gzip" basedir="." includes="${tarDir}/**/*"></tar>
+  	<delete dir="${tarDir}"/>
+  </target>
+	
+  <target name="web" depends="distr">
+    <exec executable="make" dir="web">
+      <env key="CURRENT_VERSION" value="${appVersion}">
+      </env>
+      <arg value="-e"/>
+    </exec>
+  	<mkdir dir="web/builds"/>
+  	<copy todir="web/builds/${appVersion}/other" file="${appJar}"/>
+  	<copy todir="web/builds/${appVersion}/MacOSX" file="${macAppDir}.dmg"/>
+  	<copy todir="web" file="lib/taskblocks.jnlp"/>
+  	<replace file="web/taskblocks.jnlp" token="APPVERSION" value="${appVersion}"/>
+  	<replace file="web/taskblocks.jnlp" token="CODEBASE" value="${webCodeBase}"/>
+  </target>
+
+  <target name="distr" depends="jar" description="Makes the distribution">
+    <mkdir dir="distr"/>
+    <mkdir dir="${macAppDir}"/>
+  	<copy todir="${macAppDir}">
+  		<fileset dir="lib/apptemplate">
+  			<include name="TaskBlocks.app/**/*"/>
+  		</fileset>
+  	</copy>
+  	<replace file="${macAppDir}/TaskBlocks.app/Contents/Info.plist" token="APPVERSION" value="${appVersion}"/>
+  	<chmod perm="a+x" file="${macAppDir}/TaskBlocks.app/Contents/MacOS/TaskBlocks"></chmod>
+    <copy file="${appJar}" todir="${macAppDir}/TaskBlocks.app/Contents/Resources/Java"/>
+    <copy file="${appJar}" todir="distr/other"/>
+  	<delete file="${macAppDir}.dmg"/>
+  	<exec executable="hdiutil">
+  	<arg line="create -srcfolder ${macAppDir} ${macAppDir}.dmg"/>
+  	</exec>
+  </target>
+
+  <target name="jar" depends="compile" description="creates the application jar">
+    <copy todir="bin">
+      <fileset dir="src"><include name="**/*.png"/></fileset>
+      <fileset dir="src"><include name="**/*.gif"/></fileset>
+    </copy>
+  	<echo message="${appVersion}" file="bin/taskblocks/version"/>
+    <jar basedir="bin" destfile="${appJar}">
+      <manifest>
+        <attribute name="Created-By" value="Jakub Neubauer"/>
+        <attribute name="Main-Class" value="taskblocks.app.TaskBlocks"/>
+      </manifest>
+    </jar>
+    <signjar keystore="lib/JakubKeyStore" alias="JakubNeubauer" storepass="hesloheslo" jar="${appJar}"/>
+  </target>
+
+  <target name="compile" description="Compiles java source files">
+    <mkdir dir="bin"/>
+    <javac destdir="bin" srcdir="src" includes="**/*.java" excludes="**/*Test.java">
+    </javac>
+  </target>
+
+  <target name="clean" description="Removes all temporary and built files">
+    <delete dir="bin"/>
+    <delete dir="distr"/>
+    <delete file="${appJar}"/>
+  	<delete dir="web/builds"/>
+  	<delete file="web/taskblocks.jnlp"/>
+  	<delete dir="${tarDir}"/>
+    <delete file="${tarDir}.tgz"/>
+    <exec executable="make" dir="web">
+      <arg value="clean"/>
+    </exec>
+  </target>
+
+</project>

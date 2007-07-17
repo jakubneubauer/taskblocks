@@ -1,0 +1,63 @@
+<html>
+<head>
+   include(meta.inc)
+</head>
+<body>
+<div class="page">
+  
+   <!-- Header and navigation -->
+   include(header.inc)
+
+    <div style="margin:30 0 0 20;padding:8;float:right;width:92px;border:solid 1px #888;background-color:#eee;">
+      <div style="padding: 0 0 5 0">
+        <a href="download.html"><img src="img/download.png"></a>
+      </div>
+      <a href="builds/CURRENT_VERSION/other/taskblocks.jnlp"><img src="img/webstart.png"></a>
+    </div>
+   
+
+    <h2>Simple Tasks Scheduling</h2>
+    <p>
+    This is the web of Task Blocks application. This application can help you
+    schedule projects consisted of many tasks in case you have "one-to-many"
+    relation between people and their tasks.
+
+    <h2>The Story</h2>
+    <p>
+    For purposes of our project I needed simple utility to schedule tasks.
+There are available some scheduling applications
+(<a href="http://ganttproject.biz/">Gantt Project</a>,
+MS Project,
+<a href="http://live.gnome.org/Planner/">Gnome Planner</a>).
+Actually they are so
+much general, that some simple things are almost impossible with them. For
+example in Gantt Project wasn’t possible to specify that one man can work only
+on one task at the same time. I consider desirable when an application checks
+such a constraints and adjusts tasks automatically.
+
+    <p> So I decided to write such an application. I wanted to make an
+application, in which the manipulation with tasks is as easy as manipulating
+pieces of puzzle on the table desk. Finally, after successfully using it, I
+decided to share it with other people and to provide it with open source code.
+I hope you will enjoy using it.
+
+    <h2>Main Features</h2>
+    <p>The features I like:
+    <ul>
+       <li> <p>Tasks of one man never coincide. They are automatically re-planned. Of course, the dependency is taken into account too.
+       <li> <p>Free task manipulation. You can move tasks within the tasks-area and “resize” them with Drag&amp;Drop. Holding Shift-key you define new dependency constraint.
+       <li> <p>The "shrink" button adjusts the starting times of tasks so there remain no empty spaces between them (if possible). The tasks order is preserved.
+       <li> <p>Simple task creation - you can choose “Don’t close dialog” when adding new task, which allows you to add more tasks very quickly.
+     </ul>
+     <p>
+     If you are interested, see <a href="screenshots.html">screenshots</a> or go to the <a href="download.html" title="Download">download</a><span> section and try it.
+
+  <p style="text-align:right">
+    <a href="mailto: jakub.neubauer@gmail.com">Jakub Neubauer</a>, the author
+  </p>
+
+  </div>
+
+</div>
+</body>
+</html>

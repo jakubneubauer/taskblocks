@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<jnlp
+   spec="1.0+"
+   version="APPVERSION"
+   codebase="CODEBASE"
+   href="taskblocks.jnlp"
+>
+  <information>
+    <title>Task Blocks</title>
+    <vendor>Jakub Neubauer</vendor>
+	<offline-allowed/>
+  </information>
+  <security>
+  	<all-permissions/>
+  </security>
+  <resources>
+  	<j2se version="1.5+"/>
+  	<jar href="builds/APPVERSION/other/tasblocks.jar"/>
+  </resources>
+  <application-desc main-class="taskblocks.app.TaskBlocks"/>
+</jnlp>
