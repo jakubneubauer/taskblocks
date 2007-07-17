@@ -1,6 +1,7 @@
-package bugzilla;
+package taskblocks.bugzilla;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +13,22 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import taskblocks.Utils;
 
 /**
  * Instances of this class can submit new bugs to Bugzilla.
@@ -248,7 +261,7 @@ public class BugzillaSubmitter {
 		}
 	}
 	
-	public String query(String baseUrl, String user, String password, String[] bugs) throws MalformedURLException, IOException {
+	public String query(String baseUrl, String user, String password, String[] bugs) throws MalformedURLException, IOException, SAXException, ParserConfigurationException {
 		Map<String, String> formData = new HashMap<String, String>();
 		formData.put("ctype", "xml");
 		formData.put("excludefield", "attachmentdata");
@@ -262,6 +275,22 @@ public class BugzillaSubmitter {
 		}
 		
 		String result = submit(new URL(baseUrl + "/show_record.cgi"), body);
+		
+		// parse the resulting xml
+		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(result.getBytes("UTF-8")));
+		Element rootE = doc.getDocumentElement();
+		if(!rootE.getNodeName().equals("bugzilla")) {
+			throw new IOException("Wrong xml answer, doesn't looks like bugzilla");
+		}
+		
+		List<Map<String, String>> bugsData = new ArrayList<Map<String,String>>();
+		for(Element bugE: Utils.getChilds(rootE, "bug")) {
+			Map<String, String> bugData = new HashMap<String, String>();
+			fillBugData(bugE, bugData);
+		}
 		return result;
+	}
+
+	private void fillBugData(Element bugE, Map<String, String> bugData) {
 	}
 }

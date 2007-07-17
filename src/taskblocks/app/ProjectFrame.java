@@ -21,6 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -394,7 +395,9 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			} else {
 				options = new Object[] {DONT_SAVE, SAVE, CANCEL};
 			}
-			JOptionPane op = new JOptionPane("<html><b>Do you want to save changes to this document<br>before closing?</b><br><br><font size=\"-2\">If you don't save, your changes will be lost.<br></font>", JOptionPane.QUESTION_MESSAGE, 0, null, options);
+			JLabel l = new JLabel("<html><b>Do you want to save changes to this document<br>before closing?</b><br><br><font size=\"-2\">If you don't save, your changes will be lost.<br></font><br>");
+			l.setFont(l.getFont().deriveFont(Font.PLAIN));
+			JOptionPane op = new JOptionPane(l, JOptionPane.QUESTION_MESSAGE, 0, null, options);
 			op.createDialog(this, _file == null ? "Unsaved project" : _file.getName()).setVisible(true);
 			op.setInitialSelectionValue(CANCEL);
 			Object choice = op.getValue();

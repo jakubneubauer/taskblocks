@@ -1,5 +1,12 @@
 package taskblocks;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 public class Utils {
 
 	public static final long MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -63,6 +70,29 @@ public class Utils {
 			}
 		}
 		return result;
+	}
+
+	public static Element[] getChilds(Element e, String name) {
+		List<Element>childs = new ArrayList<Element>();
+		NodeList nl = e.getChildNodes();
+		for(int i = 0; i < nl.getLength(); i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType() == Node.ELEMENT_NODE && name.equals(n.getNodeName())) {
+				childs.add((Element)n);
+			}
+		}
+		return childs.toArray(new Element[childs.size()]);
+	}
+	
+	/**
+	 * Returns text enclosed in the first child element of the parent element
+	 * 
+	 * @param parent
+	 * @param childName
+	 * @return
+	 */
+	public static String getFirstElemText(Element parent, String childName) {
+		return null; // TODO
 	}
 
 }

@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import taskblocks.Pair;
+import taskblocks.Utils;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
@@ -85,7 +86,7 @@ public class ProjectSaveLoad {
 			// 1. load all tasks and mans alone, 2. bind them between each other
 			Element mansE = getFirstChild(rootE, MANS_E);
 			if(mansE != null) {
-				Element[] manEs = getChilds(mansE, MAN_E);
+				Element[] manEs = Utils.getChilds(mansE, MAN_E);
 				for(Element manE: manEs) {
 					String manName = manE.getAttribute(NAME_A);
 					String manId = manE.getAttribute(ID_A);
@@ -96,7 +97,7 @@ public class ProjectSaveLoad {
 			}
 			Element tasksE = getFirstChild(rootE, TASKS_E);
 			if(tasksE != null) {
-				for(Element taskE: getChilds(tasksE, TASK_E)) {
+				for(Element taskE: Utils.getChilds(tasksE, TASK_E)) {
 					String taskId = taskE.getAttribute(ID_A);
 					String taskName = taskE.getAttribute(NAME_A);
 					long taskStart = Long.valueOf(taskE.getAttribute(START_A));
@@ -125,7 +126,7 @@ public class ProjectSaveLoad {
 					Element predsE = getFirstChild(taskE, PREDECESSORS_E);
 					if(predsE != null) {
 						List<String> preds = new ArrayList<String>();
-						for(Element predE: getChilds(predsE, PREDECESSOR_E)) {
+						for(Element predE: Utils.getChilds(predsE, PREDECESSOR_E)) {
 							preds.add(predE.getAttribute(PRED_A));
 						}
 						taskPredecessorsIds.add(new Pair<TaskImpl, String[]>(task, preds.toArray(new String[preds.size()])));
@@ -265,18 +266,6 @@ public class ProjectSaveLoad {
 			}
 		}
 		return null;
-	}
-	
-	private Element[] getChilds(Element e, String name) {
-		List<Element>childs = new ArrayList<Element>();
-		NodeList nl = e.getChildNodes();
-		for(int i = 0; i < nl.getLength(); i++) {
-			Node n = nl.item(i);
-			if(n.getNodeType() == Node.ELEMENT_NODE && name.equals(n.getNodeName())) {
-				childs.add((Element)n);
-			}
-		}
-		return childs.toArray(new Element[childs.size()]);
 	}
 	
 	private void prettyLayout(Element e) {

@@ -1,7 +1,6 @@
 package taskblocks.io;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -43,6 +42,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 
 import taskblocks.Utils;
+import taskblocks.bugzilla.BugzillaSubmitter;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.TaskImpl;
 
