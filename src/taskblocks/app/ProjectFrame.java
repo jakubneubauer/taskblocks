@@ -223,7 +223,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	}
 
 	public void setTitle(String title) {
-		super.setTitle("TaskMan - " + title);
+		super.setTitle(title + " - Task Blocks");
 		_myWindowMenuItem.setText(title);
 	}
 
