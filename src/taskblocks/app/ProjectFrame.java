@@ -35,6 +35,7 @@ import javax.swing.event.MenuListener;
 
 import taskblocks.graph.GraphActionListener;
 import taskblocks.graph.TaskGraphComponent;
+import taskblocks.io.BugzillaExportDialog;
 import taskblocks.io.ProjectSaveLoad;
 import taskblocks.io.WrongDataException;
 import taskblocks.modelimpl.TaskImpl;
@@ -161,6 +162,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			AboutDialog.showAbout(ProjectFrame.this);
 		}
 	};
+
+	Action _bugzillaSubmit = new MyAction("Export to Bugzilla...", getImage("bugzilla.png"), "Opens the Bugzilla Export dialog"){
+		public void actionPerformed(ActionEvent e) {
+			BugzillaExportDialog.openDialog(ProjectFrame.this, _taskModel._tasks);
+			
+		}}; 
 
 	/**
 	 * creates window with empty project.
@@ -297,6 +304,8 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menuProject.add(_newManAction).setAccelerator(getAcceleratorStroke('U'));
 		menuProject.add(new JSeparator());
 		menuProject.add(_shrinkAction).setAccelerator(getAcceleratorStroke('R'));
+		menuProject.add(new JSeparator());
+		menuProject.add(_bugzillaSubmit);
 		menu.add(menuProject);
 		
 		
