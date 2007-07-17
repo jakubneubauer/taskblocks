@@ -375,6 +375,7 @@ public class BugzillaExportDialog extends JDialog {
 		taskProps.put(BugzillaSubmitter.OS, _osTF.getText());
 		taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
 		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
+		taskProps.put(BugzillaSubmitter.DESCRIPTION, "");
 
 		try {
 			//String bugId = "pokus";
