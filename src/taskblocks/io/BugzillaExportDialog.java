@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
@@ -83,6 +85,8 @@ public class BugzillaExportDialog extends JDialog {
 	JTextField _severTF;
 
 	JTextPane _logArea;
+	
+	JTextField _keywordsTF;
 
 	public BugzillaExportDialog(JFrame owner, TaskImpl[] tasks) {
 		super(owner, "Bugzilla export", true);
@@ -156,6 +160,7 @@ public class BugzillaExportDialog extends JDialog {
 		_osTF = new JTextField("All");
 		_priorTF = new JTextField("P2");
 		_severTF = new JTextField("enhancement");
+		_keywordsTF = new JTextField("Plan");
 
 		// layout components
 		contentP.setLayout(new GridBagLayout());
@@ -205,6 +210,8 @@ public class BugzillaExportDialog extends JDialog {
 		contentP.add(new JLabel("Priority:"), gc);
 		gc.gridy++;
 		contentP.add(new JLabel("Severity:"), gc);
+		gc.gridy++;
+		contentP.add(new JLabel("Keywords:"), gc);
 
 		// add edit fields
 		gc.gridx = 1;
@@ -240,6 +247,8 @@ public class BugzillaExportDialog extends JDialog {
 		contentP.add(_priorTF, gc);
 		gc.gridy++;
 		contentP.add(_severTF, gc);
+		gc.gridy++;
+		contentP.add(_keywordsTF, gc);
 
 		p.add(contentP, BorderLayout.NORTH);
 		JScrollPane logSP = new JScrollPane(_logArea);
@@ -329,7 +338,6 @@ public class BugzillaExportDialog extends JDialog {
 
 	}
 
-	
 	private void submit() {
 		_okAction.setEnabled(false);
 		new Thread() {
@@ -339,8 +347,23 @@ public class BugzillaExportDialog extends JDialog {
 					int fails = 0;
 					for (int i = 0; BugzillaExportDialog.this.isShowing() && i < _tasks.length; i++) {
 						if (((Boolean) _tasksData[i][0]).booleanValue()) {
+
+							final int row = i;
+							SwingUtilities.invokeAndWait(new Runnable(){
+								public void run() {
+									_tasksTable.getSelectionModel().setSelectionInterval(row, row);
+									_tasksTable.scrollRectToVisible(_tasksTable.getCellRect(row, 0, true));
+								}
+							});
+							
 							if(submitTask(_tasksData[i], _tasks[i])) {
 								success++;
+								SwingUtilities.invokeAndWait(new Runnable(){
+									public void run() {
+										_tasksData[row][0] = Boolean.FALSE;
+										((TasksModel)_tasksTable.getModel()).fireTableDataChanged();
+									}
+								});
 							} else {
 								fails++;
 							}
@@ -352,6 +375,10 @@ public class BugzillaExportDialog extends JDialog {
 					if(fails > 0) {
 						logMsg("Failed to submit " + fails + " tasks");
 					}
+				} catch(InterruptedException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
 				} finally {
 					_okAction.setEnabled(true);
 				}
@@ -375,7 +402,8 @@ public class BugzillaExportDialog extends JDialog {
 		taskProps.put(BugzillaSubmitter.OS, _osTF.getText());
 		taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
 		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
-		taskProps.put(BugzillaSubmitter.DESCRIPTION, "");
+		taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
+		taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
 
 		try {
 			//String bugId = "pokus";
