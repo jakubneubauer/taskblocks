@@ -6,7 +6,7 @@
 
   <project name="Task Blocks" default="jar">
   
-  <property name="appVersion" value="0.5-preview"/>
+  <property name="appVersion" value="0.6-preview"/>
   <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
 	
   <property name="appJar" value="taskblocks.jar"/>
