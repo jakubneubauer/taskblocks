@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) Jakub Neubauer, 2007
+ *
+ * This file is part of TaskBlocks
+ *
+ * TaskBlocks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TaskBlocks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package taskblocks.io;
 
 import java.awt.BorderLayout;
@@ -7,13 +26,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -87,6 +111,8 @@ public class BugzillaExportDialog extends JDialog {
 	JTextPane _logArea;
 	
 	JTextField _keywordsTF;
+	
+	Preferences _prefs = Preferences.userNodeForPackage(this.getClass());
 
 	public BugzillaExportDialog(JFrame owner, TaskImpl[] tasks) {
 		super(owner, "Bugzilla export", true);
@@ -111,6 +137,25 @@ public class BugzillaExportDialog extends JDialog {
 		mainP.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 		
 		setDefaultActions(getRootPane());
+		this.addWindowListener(new WindowAdapter(){
+		    public void windowClosed(WindowEvent e) {
+		    	saveTextFields();
+		    }
+		});
+	}
+	
+	private void saveTextFields() {
+		_prefs.put("baseUrl", _baseUrlTF.getText());
+		_prefs.put("user", _userTF.getText());
+		_prefs.put("product", _productTF.getText());
+		_prefs.put("version", _versionTF.getText());
+		_prefs.put("component", _componentTF.getText());
+		_prefs.put("blocks", _blocksTF.getText());
+		_prefs.put("hardware", _hardwareTF.getText());
+		_prefs.put("os", _osTF.getText());
+		_prefs.put("priority", _priorTF.getText());
+		_prefs.put("severity", _severTF.getText());
+		_prefs.put("keywords", _keywordsTF.getText());
 	}
 	
 	private void setDefaultActions(JRootPane rootPane) {
@@ -149,18 +194,24 @@ public class BugzillaExportDialog extends JDialog {
 		_logArea.setEditable(false);
 		_logArea.setText("<html>Log:");
 		
-		_baseUrlTF = new JTextField("http://jakubpc/bugzilla-3.0");
-		_userTF = new JTextField("j.neubauer@cz.gmc.net");
-		_passwdTF = new JPasswordField("heslo");
-		_productTF = new JTextField("PNet PA");
-		_versionTF = new JTextField("5.2");
-		_componentTF = new JTextField("General");
-		_blocksTF = new JTextField();
-		_hardwareTF = new JTextField("All");
-		_osTF = new JTextField("All");
-		_priorTF = new JTextField("P2");
-		_severTF = new JTextField("enhancement");
-		_keywordsTF = new JTextField("Plan");
+		String domain="";
+		try {
+			domain = InetAddress.getLocalHost().getCanonicalHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		_baseUrlTF = new JTextField(_prefs.get("baseUrl", "http://"));
+		_userTF = new JTextField(_prefs.get("user", System.getProperty("user.name") + "@" + domain));
+		_passwdTF = new JPasswordField("");
+		_productTF = new JTextField(_prefs.get("product", ""));
+		_versionTF = new JTextField(_prefs.get("version", ""));
+		_componentTF = new JTextField(_prefs.get("component", ""));
+		_blocksTF = new JTextField(_prefs.get("blocks", ""));
+		_hardwareTF = new JTextField(_prefs.get("hardware", "All"));
+		_osTF = new JTextField(_prefs.get("os", "All"));
+		_priorTF = new JTextField(_prefs.get("priority", "P2"));
+		_severTF = new JTextField(_prefs.get("severity", "enhancement"));
+		_keywordsTF = new JTextField(_prefs.get("keywords", ""));
 
 		// layout components
 		contentP.setLayout(new GridBagLayout());
@@ -409,11 +460,17 @@ public class BugzillaExportDialog extends JDialog {
 			//String bugId = "pokus";
 			String bugId = bs.submit(_baseUrlTF.getText(), _userTF.getText(),
 					_passwdTF.getText(), taskProps);
-			logMsg("- Submitted bug #" + bugId + " for " + task.getName() + "\n");
+			logMsg("- Submitted bug #" + bugId + " for task '" + task.getName() + "'\n");
 			return true;
 		} catch (Exception e) {
-			logMsg("<font color=\"#ff0000\"><b>- Error submitting task " + task.getName()
-					+ ":</b><br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + e.getMessage()
+			String msg;
+			if(e instanceof IOException || e.getMessage() == null) {
+				msg = e.toString();
+			} else {
+				msg = e.getMessage();
+			}
+			logMsg("<font color=\"#ff0000\"><b>- Error submitting task '" + task.getName()
+					+ "'</b><br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + msg
 					+ "</font>\n");
 			return false;
 		}

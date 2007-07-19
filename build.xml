@@ -4,9 +4,9 @@
      Task Blocks Build File
 -->
 
-	<project name="Task Blocks" default="jar">
+  <project name="Task Blocks" default="jar">
   
-  <property name="appVersion" value="0.5 preview"/>
+  <property name="appVersion" value="0.5-preview"/>
   <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
 	
   <property name="appJar" value="taskblocks.jar"/>
@@ -56,7 +56,10 @@
     <copy file="${appJar}" todir="distr/other"/>
   	<delete file="${macAppDir}.dmg"/>
   	<exec executable="hdiutil">
-  	<arg line="create -srcfolder ${macAppDir} ${macAppDir}.dmg"/>
+  	  <arg value="create"/>
+  	  <arg value ="-srcfolder"/>
+  	  <arg value="${macAppDir}"/>
+  	  <arg value="${macAppDir}.dmg"/>
   	</exec>
   </target>
 

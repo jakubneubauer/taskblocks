@@ -1,4 +1,10 @@
-/*
+#!/bin/bash
+#
+# This script updates headers of each source file and puts the Copyright
+# and copying terms to them. It must be from the project's main directory.
+#
+
+HEADER='/*
  * Copyright (C) Jakub Neubauer, 2007
  *
  * This file is part of TaskBlocks
@@ -17,21 +23,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package taskblocks.graph;
+'
 
-public interface TaskGraphModel {
-	
-	Object[] getTasks();
-	Object[] getMans();
-	
-	Object[] getTaskPredecessors(Object task);
-	long getTaskDuration(Object task);
-	long getTaskStartTime(Object task);
-	Object getTaskMan(Object task);
-	String getTaskName(Object task);
-	String getManName(Object man);
-
-	public void updateTask(Object task, Object taskMan, long startTime, long duration, Object[] precedingTasks);
-	public void removeTask(Object task);
-	public void removeMan(Object man);
-}
+for f in `find src -name '*.java'`; do
+  echo "Modyfying $f"
+  mv "$f" "$f.tmp"
+  printf "$HEADER" > "$f"
+  cat "$f.tmp" | awk '
+    BEGIN {out=0;}
+    /^\W*package/ {out=1;}
+    {if(out==1) print;}
+  ' >> "$f"
+  rm "$f.tmp"
+done
