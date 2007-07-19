@@ -1,7 +1,9 @@
 package taskblocks.app;
 
 import java.io.File;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 public class TaskBlocks  {
@@ -29,6 +31,14 @@ public class TaskBlocks  {
 
 	public static void main(String args[]) {
 		new TaskBlocks(args);
+	}
+
+	public static ImageIcon getImage(String name) {
+		URL url = ProjectFrame.class.getResource("/taskblocks/img/" + name);
+		if (url == null) {
+			return null;
+		}
+		return new ImageIcon(url);
 	}
 
 }

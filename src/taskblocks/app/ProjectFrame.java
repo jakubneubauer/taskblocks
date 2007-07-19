@@ -12,13 +12,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -56,20 +54,20 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	boolean _newCleanProject;
 	JCheckBoxMenuItem _myWindowMenuItem;
 	
-	Action _shrinkAction = new MyAction("Shrink", getImage("shrink.png"), "Shrink tasks as near as possible") {
+	Action _shrinkAction = new MyAction("Shrink", TaskBlocks.getImage("shrink.png"), "Shrink tasks as near as possible") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.getGraphRepresentation().shrinkTasks();
 			_graph.repaint();
 		}
 	};
 	
-	Action _scaleDownAction = new MyAction("Zoom Out", getImage("zoomOut.png")) {
+	Action _scaleDownAction = new MyAction("Zoom Out", TaskBlocks.getImage("zoomOut.png")) {
 		public void actionPerformed(ActionEvent arg0) {
 			_graph.scaleDown();
 		}
 	};
 	
-	Action _scaleUpAction = new MyAction("Zoom In", getImage("zoomIn.png")) {
+	Action _scaleUpAction = new MyAction("Zoom In", TaskBlocks.getImage("zoomIn.png")) {
 		public void actionPerformed(ActionEvent arg0) {
 			_graph.scaleUp();
 		}
@@ -81,7 +79,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 	
-	Action _loadFileAction = new MyAction("Open...", getImage("folder.gif"), "Lets you open an existing project") {
+	Action _loadFileAction = new MyAction("Open...", TaskBlocks.getImage("folder.gif"), "Lets you open an existing project") {
 		public void actionPerformed(ActionEvent e) {
 
 			File f = null;
@@ -111,7 +109,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 
-	Action _saveAction = new MyAction("Save", getImage("save.png")) {
+	Action _saveAction = new MyAction("Save", TaskBlocks.getImage("save.png")) {
 		public void actionPerformed(ActionEvent e) {
 			save();
 		}
@@ -127,19 +125,19 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 	
-	Action _leftAction = new MyAction("Left", getImage("left.gif"), "Scrolls left") {
+	Action _leftAction = new MyAction("Left", TaskBlocks.getImage("left.gif"), "Scrolls left") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.moveLeft();
 		}
 	};
 
-	Action _focusTodayAction = new MyAction("Focus on today", getImage("down.gif"), "Scrolls to current day") {
+	Action _focusTodayAction = new MyAction("Focus on today", TaskBlocks.getImage("down.gif"), "Scrolls to current day") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.focusOnToday();
 		}
 	};
 
-	Action _rightAction = new MyAction("Right", getImage("right.gif"), "Scrolls right") {
+	Action _rightAction = new MyAction("Right", TaskBlocks.getImage("right.gif"), "Scrolls right") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.moveRight();
 		}
@@ -158,13 +156,13 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 
-	Action _newTaskAction = new MyAction("New Task...", getImage("newtask.png"), "Opens the New Task Wizard"){
+	Action _newTaskAction = new MyAction("New Task...", TaskBlocks.getImage("newtask.png"), "Opens the New Task Wizard"){
 		public void actionPerformed(ActionEvent e) {
 			TaskConfigDialog.openDialog(ProjectFrame.this, null, _taskModel, _graph, true);
 		}
 	};
 
-	Action _newManAction = new MyAction("New Worker...", getImage("newman.png"), "Opens the New Worker Wizard"){
+	Action _newManAction = new MyAction("New Worker...", TaskBlocks.getImage("newman.png"), "Opens the New Worker Wizard"){
 		public void actionPerformed(ActionEvent e) {
 			ManConfigDialog.openDialog(ProjectFrame.this, null, _taskModel, _graph, true);
 		}
@@ -175,13 +173,13 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	};
 
-	Action _bugzillaSubmit = new MyAction("Export to Bugzilla...", getImage("bugzilla.png"), "Opens the Bugzilla Export dialog"){
+	Action _bugzillaSubmit = new MyAction("Export to Bugzilla...", TaskBlocks.getImage("bugzilla.png"), "Opens the Bugzilla Export dialog"){
 		public void actionPerformed(ActionEvent e) {
 			BugzillaExportDialog.openDialog(ProjectFrame.this, _taskModel._tasks);
 			
 		}};
 		
-	Action _deleteSel = new MyAction("Delete Selection", getImage("delete.gif"), "Deletes selected objects") {
+	Action _deleteSel = new MyAction("Delete Selection", TaskBlocks.getImage("delete.gif"), "Deletes selected objects") {
 		public void actionPerformed(ActionEvent e) {
 			_graph.deleteSelection();
 		}
@@ -204,6 +202,9 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	}
 	
 	private ProjectFrame(TaskModelImpl model) {
+		// there are some issues with transparent icon in frame, so we use icon
+		// with filled background.
+		this.setIconImage(TaskBlocks.getImage("frameicon32.png").getImage());
 		_taskModel = model;
 		buildGui();
 		pack();
@@ -499,13 +500,5 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		if(task != null && e.getClickCount() >= 2) {
 			configureTask((TaskImpl)task);
 		}
-	}
-
-	private static ImageIcon getImage(String name) {
-		URL url = ProjectFrame.class.getResource("/taskblocks/img/" + name);
-		if (url == null) {
-			return null;
-		}
-		return new ImageIcon(url);
 	}	
 }
