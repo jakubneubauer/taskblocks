@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -178,7 +179,13 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		public void actionPerformed(ActionEvent e) {
 			BugzillaExportDialog.openDialog(ProjectFrame.this, _taskModel._tasks);
 			
-		}}; 
+		}};
+		
+	Action _deleteSel = new MyAction("Delete Selection", getImage("delete.gif"), "Deletes selected objects") {
+		public void actionPerformed(ActionEvent e) {
+			_graph.deleteSelection();
+		}
+	}; 
 
 	/**
 	 * creates window with empty project.
@@ -271,18 +278,25 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		// setup toolbar actions
 		toolB.add(_loadFileAction);
 		toolB.add(_saveAction);
-		toolB.add(Box.createHorizontalStrut(8));
+		toolB.add(Box.createHorizontalStrut(4));
+		toolB.add(new FixedSeparator(FixedSeparator.VERTICAL));
+		toolB.add(Box.createHorizontalStrut(4));
 		toolB.add(_newTaskAction);
 		toolB.add(_newManAction);
 		toolB.add(_shrinkAction);
-		toolB.add(Box.createHorizontalStrut(8));
+		toolB.add(Box.createHorizontalStrut(4));
+		toolB.add(new FixedSeparator(FixedSeparator.VERTICAL));
+		toolB.add(Box.createHorizontalStrut(4));
 		toolB.add(_scaleUpAction);
 		toolB.add(_scaleDownAction);
 		toolB.add(Box.createHorizontalStrut(8));
 		toolB.add(_leftAction);
 		toolB.add(_rightAction);
 		toolB.add(_focusTodayAction);
-		
+		toolB.add(Box.createHorizontalStrut(4));
+		toolB.add(new FixedSeparator(FixedSeparator.VERTICAL));
+		toolB.add(Box.createHorizontalStrut(4));
+		toolB.add(_deleteSel);
 		// set component's properties
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		mainP.add(toolB, BorderLayout.NORTH);
@@ -315,8 +329,14 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menuProject.add(_newTaskAction).setAccelerator(getAcceleratorStroke('T'));
 		menuProject.add(_newManAction).setAccelerator(getAcceleratorStroke('U'));
 		menuProject.add(new JSeparator());
-		menuProject.add(_shrinkAction).setAccelerator(getAcceleratorStroke('R'));
+		JMenuItem mi = menuProject.add(_deleteSel);
+		if(TaskBlocks.RUNNING_ON_MAC) {
+			mi.setAccelerator(getAcceleratorStroke(KeyEvent.VK_BACK_SPACE));
+		} else {
+			mi.setAccelerator(getAcceleratorStroke(KeyEvent.VK_DELETE));
+		}
 		menuProject.add(new JSeparator());
+		menuProject.add(_shrinkAction).setAccelerator(getAcceleratorStroke('R'));
 		menuProject.add(_bugzillaSubmit);
 		menu.add(menuProject);
 		
@@ -374,6 +394,9 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	
 	private KeyStroke getAcceleratorStroke(char key) {
 		return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+	}
+	private KeyStroke getAcceleratorStroke(int keyCode) {
+		return KeyStroke.getKeyStroke(keyCode, 0);
 	}
 		
 	private void setFile(File f) {

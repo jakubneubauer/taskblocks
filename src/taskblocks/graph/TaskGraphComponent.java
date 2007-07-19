@@ -8,7 +8,12 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.Line2D;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,6 +21,7 @@ import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeListener;
 
@@ -23,7 +29,7 @@ import taskblocks.Colors;
 import taskblocks.Pair;
 import taskblocks.Utils;
 
-public class TaskGraphComponent extends JComponent {
+public class TaskGraphComponent extends JComponent implements ComponentListener, AdjustmentListener {
 	
 	static int ROW_HEIGHT = 30;
 	private static int DEFAULT_DAY_WIDTH = 10;
@@ -70,23 +76,36 @@ public class TaskGraphComponent extends JComponent {
 	/** width of graph area */
 	private int _graphWidth;
 	/** height of graph area */
-	private int _graphHeight;
+	int _graphHeight;
 	/** Width of the left column with workers */
 	int _headerWidth;
 	/** Handler of mouse events */
 	GraphMouseHandler _mouseHandler;
+	JScrollBar _verticalScroll;
+	
+	/**
+	 * Contains the bounds of the whole content displayed in the component.
+	 * Is used to display scrollbars at right position and with the right size
+	 */
+	Rectangle _contentBounds = new Rectangle();
+	
+	int _scrollTop;
 	
 	public TaskGraphComponent(TaskGraphModel model, TaskGraphPainter painter) {
 		_painter = painter;
 
 		setModel(model);
 		_mouseHandler = new GraphMouseHandler(this);
-	
-		setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+		_verticalScroll = new JScrollBar(JScrollBar.VERTICAL);
+		this.add(_verticalScroll);
+		_verticalScroll.addAdjustmentListener(this);
+		
+		setBorder(BorderFactory.createEmptyBorder(0,0,15,0));
 		this.addMouseMotionListener(_mouseHandler);
 		this.addMouseListener(_mouseHandler);
 		this.addMouseWheelListener(_mouseHandler);
 		this.addKeyListener(_mouseHandler);
+		this.addComponentListener(this);
 		this.setFocusable(true);
 		ToolTipManager.sharedInstance().setDismissDelay(8000);
 		ToolTipManager.sharedInstance().setReshowDelay(3000);
@@ -142,6 +161,10 @@ public class TaskGraphComponent extends JComponent {
 			
 			g2.clipRect(insets.left, insets.top, getWidth()-insets.left-insets.right, getHeight()-insets.top-insets.bottom);
 			
+			// reset content bounds
+			_contentBounds.y = Integer.MAX_VALUE;
+			_contentBounds.height = -1;
+			
 			// paint rows
 			for(TaskRow row: _builder._rows) {
 				row._bounds.x = insets.left;
@@ -154,6 +177,17 @@ public class TaskGraphComponent extends JComponent {
 					g2.setColor(Color.lightGray);
 					int lineY = row._topPosition-row._topPadding*CONN_PADDING_FACTOR;
 					g2.drawLine(insets.left, lineY, 2000, lineY);
+				}
+				
+				// adjust vertical size of the content bounds
+				if(_contentBounds.y > row._bounds.y) {
+					if(_contentBounds.height != -1) {
+						_contentBounds.height += (_contentBounds.y - row._bounds.y);
+					}
+					_contentBounds.y = row._bounds.y;
+				}
+				if(_contentBounds.y + _contentBounds.height < row._bounds.y + row._bounds.height + CONN_PADDING_FACTOR) {
+					_contentBounds.height = row._bounds.y + row._bounds.height - _contentBounds.y + CONN_PADDING_FACTOR;
 				}
 			}
 			
@@ -173,6 +207,12 @@ public class TaskGraphComponent extends JComponent {
 			for(int i = _builder._tasks.length-1; i >= 0; i--) {
 				t = _builder._tasks[i];
 				_painter.paintTask(t._userObject, g2, t._bounds, t._selected || t == _mouseHandler._pressedTask);
+				// adjust the holder of content size
+				
+				if(_contentBounds.y > t._bounds.y) {_contentBounds.y = t._bounds.y;}
+				if(_contentBounds.y + _contentBounds.height < t._bounds.y + t._bounds.height) {
+					_contentBounds.height = t._bounds.y + t._bounds.height - _contentBounds.y;
+				}
 			}
 			// paint weekends and header
 			paintHeaderAndWeekends(g2);
@@ -194,6 +234,11 @@ public class TaskGraphComponent extends JComponent {
 				g2.drawLine(_mouseHandler._pressX, _mouseHandler._pressY, _mouseHandler.getLastMouseX(), _mouseHandler.getLastMouseY());
 			}
 		}
+		
+		adjustScrolls();
+		
+		// paint children, at least scroll bar(s)
+		paintChildren(g);
 	}
 	
 	public void scaleDown() {
@@ -524,4 +569,78 @@ public class TaskGraphComponent extends JComponent {
 		x+= _dayWidth/2; // we want the nearest day, not the one rounded down.
 		return (x - _graphLeft) / _dayWidth + _firstDay;
 	}
+
+	public void componentHidden(ComponentEvent e) {
+	}
+
+	public void componentMoved(ComponentEvent e) {
+	}
+
+	public void componentResized(ComponentEvent e) {
+		recountBounds();
+		Insets insets = getInsets();
+		_verticalScroll.setBounds(
+				getWidth() - _verticalScroll.getWidth() - insets.right,
+				_graphTop+1,
+				_verticalScroll.getPreferredSize().width,
+				getHeight() - _graphTop - insets.bottom-2
+				);
+	}
+
+	public void componentShown(ComponentEvent e) {
+	}
+
+	boolean _adjustingScrolls;
+	public void adjustmentValueChanged(AdjustmentEvent e) {
+		if(_adjustingScrolls) {
+			return;
+		}
+		if(_contentBounds.height == -1) {
+			return;
+		}
+		if(e.getSource() == _verticalScroll) {
+			// helper variable
+			Rectangle b = new Rectangle(_contentBounds);
+			b.y-=10;
+			b.height+=20;
+			int top = _graphTop;
+			int bottom = getHeight() - getInsets().bottom; // TODO + horizScroll.height
+			int canScrollUp = Math.max(0, Math.max(bottom - b.y - b.height, top - b.y));
+			
+			int diff = _verticalScroll.getValue() - canScrollUp;
+			_scrollTop -= diff;
+			_builder.setPaintDirty();
+			repaint();
+		}
+	}
+	private void adjustScrolls() {
+		// helper variable
+		_adjustingScrolls = true;
+		if(_contentBounds.height == -1) {
+			return;
+		}
+		try {
+			Rectangle b = new Rectangle(_contentBounds);
+			b.y-=10;
+			b.height+=20;
+			int top = _graphTop;
+			int bottom = getHeight() - getInsets().bottom; // TODO + horizScroll.height
+			
+			int canScrollDown = Math.max(0, Math.max(b.y-top, b.y + b.height - bottom));
+			int canScrollUp = Math.max(0, Math.max(bottom - (b.y + b.height), top - b.y));
+			
+			//System.out.println(_contentBounds.y + ", " + contentBottom + ", " + top + ", " + bottom + " : " + canScrollUp + ", " + canScrollDown);
+	        _verticalScroll.setMaximum(canScrollUp + canScrollDown);
+	        _verticalScroll.setBlockIncrement((canScrollUp + canScrollDown) / 5);
+	        _verticalScroll.setValue(canScrollUp);
+			//System.out.println(_verticalScroll.getMinimum() + ", " + _verticalScroll.getMaximum() + ", " + _verticalScroll.getValue());
+		} finally {
+			_adjustingScrolls = false;
+		}
+	}
+	
+	public void deleteSelection() {
+		_mouseHandler.deleteSelection();
+	}
+
 }

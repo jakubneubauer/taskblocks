@@ -29,7 +29,7 @@ class TaskLayouter {
 		_graph.recountBounds();
 
 		// count rows and tasks boundaries
-		int cummulatedRowAdd = 0;
+		int cummulatedRowAdd = _graph._scrollTop;
 		for (TaskRow row : _builder._rows) {
 			int rowTop = (int) (_graphTop + rowIndex * _rowHeight + cummulatedRowAdd);
 

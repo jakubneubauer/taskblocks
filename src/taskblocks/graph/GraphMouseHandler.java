@@ -402,8 +402,16 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 	}
 
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+		/*if(e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 			deleteSelection();
+		} else */if(e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+			_graph._verticalScroll.setValue(_graph._verticalScroll.getValue() + _graph._graphHeight/2);
+		} else if(e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+			_graph._verticalScroll.setValue(_graph._verticalScroll.getValue() - _graph._graphHeight/2);
+		} else if(e.getKeyCode() == KeyEvent.VK_UP) {
+			_graph._verticalScroll.setValue(_graph._verticalScroll.getValue() - 10);
+		} else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+			_graph._verticalScroll.setValue(_graph._verticalScroll.getValue() + 10);
 		}
 	}
 
@@ -413,7 +421,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 	public void keyTyped(KeyEvent e) {
 	}
 
-	private void deleteSelection() {
+	void deleteSelection() {
 		boolean changed = false;
 		for(Object o: _selection) {
 			if(o instanceof Connection) {
