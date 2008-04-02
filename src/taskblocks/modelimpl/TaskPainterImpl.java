@@ -25,6 +25,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 import taskblocks.Colors;
+import taskblocks.Utils;
 import taskblocks.graph.TaskGraphPainter;
 
 public class TaskPainterImpl implements TaskGraphPainter {
@@ -36,6 +37,12 @@ public class TaskPainterImpl implements TaskGraphPainter {
 	
 	public void paintTask(Object task, Graphics2D g2, Rectangle bounds, boolean selected) {
 		String taskName = ((TaskImpl)task).getName();
+		
+		long actualFinish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getActualDuration());
+		long finish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getDuration());
+
+		//double percentage = (double)((TaskImpl)task).getActualDuration() / (double)((TaskImpl)task).getDuration();
+		double percentage = ((double)actualFinish - (double)((TaskImpl)task).getStartTime()) / ((double)finish - (double)((TaskImpl)task).getStartTime());
 		
 		Color col = ((TaskImpl)task).getColor();
 		
@@ -52,15 +59,27 @@ public class TaskPainterImpl implements TaskGraphPainter {
 		}
 		g2.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 5, 5);
 		
+		// percentage of actual duration/planned duration:
+		int right = bounds.x + (int)((bounds.width+4) * percentage)-5;
+		g2.setColor(_taskBorderCol);
+		g2.drawLine(bounds.x+1, bounds.y+4, bounds.x + bounds.width-1	, bounds.y+4);
+		if(percentage > 0) {
+			//g2.drawLine(bounds.x+1, bounds.y+4, right, bounds.y+4);
+			g2.setColor(new Color(0,0,0,150));
+			g2.drawLine(bounds.x+1, bounds.y+3, right, bounds.y+3);
+			g2.drawLine(bounds.x+1, bounds.y+2, right, bounds.y+2);
+			g2.drawLine(bounds.x+1, bounds.y+1, right, bounds.y+1);
+		}
+		
 		Rectangle oldClips = g2.getClipBounds();
 		g2.setColor(Color.black);
 		g2.clipRect(bounds.x, bounds.y, bounds.width-4, bounds.height-3);
 		
 		FontMetrics fm = g2.getFontMetrics();
 		
-		g2.drawString(taskName, bounds.x + 5, bounds.y+ (fm.getHeight() + bounds.height)/2 - fm.getDescent());
+		g2.drawString(taskName, bounds.x + 5, bounds.y+ (fm.getHeight() + bounds.height)/2 - fm.getDescent() + 2);
+
 		g2.setClip(oldClips.x, oldClips.y, oldClips.width, oldClips.height);
-		//g2.drawRect(bounds.x+1, bounds.y+1, bounds.width, bounds.height);
 	}
 
 	public void paintRowHeader(Object man, Graphics2D g2, Rectangle bounds, boolean selected) {

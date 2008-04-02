@@ -26,12 +26,14 @@ public interface TaskGraphModel {
 	
 	Object[] getTaskPredecessors(Object task);
 	long getTaskDuration(Object task);
+	long getTaskActualDuration(Object task);
 	long getTaskStartTime(Object task);
 	Object getTaskMan(Object task);
 	String getTaskName(Object task);
 	String getManName(Object man);
+	String getTaskComment(Object task);
 
-	public void updateTask(Object task, Object taskMan, long startTime, long duration, Object[] precedingTasks);
+	public void updateTask(Object task, Object taskMan, long startTime, long duration, long actualDuration, Object[] precedingTasks);
 	public void removeTask(Object task);
 	public void removeMan(Object man);
 }

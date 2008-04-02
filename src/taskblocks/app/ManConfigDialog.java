@@ -83,7 +83,7 @@ public class ManConfigDialog extends ConfigDialogStub  {
 		_model.addMan(man);
 		
 		_graph.setModel(_model);
-		_graph.getGraphRepresentation().setDirty();
+		_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 		_graph.repaint();
 		
 		_cfgPanel.nameTF.setSelectionStart(0);

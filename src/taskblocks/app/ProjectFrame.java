@@ -257,6 +257,8 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			
 		} catch (WrongDataException e) {
 			JOptionPane.showMessageDialog(null, "<html><b>Couldn't Open File</b><br><br><font size=\"-2\">" + e.getMessage() + "<br><br>");
+		} catch(Exception e) {
+			JOptionPane.showMessageDialog(null, "<html><b>Couldn't Open File</b><br><br><font size=\"-2\">" + e.getMessage() + "<br><br>");
 		}
 	}
 

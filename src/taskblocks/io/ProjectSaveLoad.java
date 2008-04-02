@@ -69,9 +69,11 @@ public class ProjectSaveLoad {
 	public static final String ID_A = "id";
 	public static final String START_A = "start";
 	public static final String DURATION_A = "duration";
+	public static final String ACTUAL_A = "actualDuration";
 	public static final String MAN_A = "man";
 	public static final String PRED_A = "pred";
 	public static final String COLOR_A = "color";
+	public static final String COMM_A = "comment";
 	
 	TaskModelImpl _model;
 	Map<String, TaskImpl> _taskIds;
@@ -121,7 +123,14 @@ public class ProjectSaveLoad {
 					String taskName = taskE.getAttribute(NAME_A);
 					long taskStart = Long.valueOf(taskE.getAttribute(START_A));
 					long taskDuration = Long.valueOf(taskE.getAttribute(DURATION_A));
+					
+					String usedStr = taskE.getAttribute(ACTUAL_A);
+					long taskUsed = 0;
+					if(usedStr != null && usedStr.trim().length() > 0) {
+						taskUsed = Long.valueOf(taskE.getAttribute(ACTUAL_A));
+					}
 					String colorTxt = taskE.getAttribute(COLOR_A);
+					String comment = taskE.getAttribute(COMM_A);
 					String taskManId = taskE.getAttribute(MAN_A);
 					ManImpl man = mans.get(taskManId); // mans are already loaded
 					
@@ -133,7 +142,9 @@ public class ProjectSaveLoad {
 					task.setName(taskName);
 					task.setStartTime(taskStart);
 					task.setDuration(taskDuration);
+					task.setActualDuration(taskUsed);
 					task.setMan(man);
+					task.setComment( comment );
 					if(colorTxt != null && colorTxt.length() > 0) {
 						int colorIndex = Integer.parseInt(colorTxt);
 						if(colorIndex >= 0 && colorIndex < ColorLabel.COLOR_LABELS.length) {
@@ -258,7 +269,9 @@ public class ProjectSaveLoad {
 		taskE.setAttribute(ID_A, t._id);
 		taskE.setAttribute(START_A, String.valueOf(t.getStartTime()));
 		taskE.setAttribute(DURATION_A, String.valueOf(t.getDuration()));
+		taskE.setAttribute(ACTUAL_A, String.valueOf(t.getActualDuration()));
 		taskE.setAttribute(MAN_A, t.getMan()._id);
+		taskE.setAttribute(COMM_A, t.getComment());
 		if(t.getColorLabel() != null) {
 			taskE.setAttribute(COLOR_A, String.valueOf(t.getColorLabel()._index));
 		}

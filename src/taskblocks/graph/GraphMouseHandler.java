@@ -208,7 +208,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 					}
 				}
 				break;
-			case 3: // dragging right mouse boundary
+			case 3: // dragging right task boundary
 				if(_pressedTask != null) {
 					long newEndTime = _graph.xToTime(p.x);
 					long oldEndTime = _pressedTask.getFinishTime();
@@ -242,7 +242,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 				}
 				_graph.repaint();
 				break;
-			case 5:
+			case 5: // Scrolling the Frame
 				long tmpFirstDay = _graph._firstDay;
 				_graph._firstDay = _pressFirstDay;
 				long mouseDay = _graph.xToTime(p.x);
@@ -256,6 +256,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 				}
 				break;
 		}
+		_graph._builder.updateModel();
 	}
 	
 	public void mouseEntered(MouseEvent arg0) {
@@ -284,7 +285,8 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 			String start = df.format(new Date(t.getStartTime() * Utils.MILLISECONDS_PER_DAY));
 			String end = df.format(new Date(t.getFinishTime() * Utils.MILLISECONDS_PER_DAY));
 			String duration = String.valueOf(t.getDuration());
-			_graph.setToolTipText("<html><p style=\"padding:2 5 2 5;\"><b>" + taskName + "</b><br>Start: " + start + "&nbsp;&nbsp;&nbsp;End: " + end + "<br>Duration: " + duration + " days");
+			String comment = t.getComment();
+			_graph.setToolTipText("<html><p style=\"padding:2 5 2 5;\"><b>" + taskName + "</b><br>Start: " + start + "&nbsp;&nbsp;&nbsp;End: " + end + "<br>Duration: " + duration + " days<br>Comment: "+comment);
 		} else {
 			_graph.setToolTipText(null);
 		}
@@ -382,6 +384,8 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 				_graph.repaint();
 			}
 		}
+		
+		_graph._builder.updateModel();
 		
 		_graph.changeCursor(e.getPoint());
 		_dragMode = 0;

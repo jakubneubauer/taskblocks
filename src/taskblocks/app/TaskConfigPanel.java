@@ -19,6 +19,7 @@
 
 package taskblocks.app;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,7 +29,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerNumberModel;
@@ -44,8 +47,10 @@ public class TaskConfigPanel extends JPanel {
 	
 	JComboBox manCB;
 	JTextField nameTF;
-	JSpinner durationSP;
+	JSpinner planedSP;
+	JSpinner actualSP;
 	JComboBox _colorLabelCB;
+	JTextArea commentTA;
 	
 	public TaskConfigPanel(TaskImpl task, TaskModelImpl model) {
 		_task = task;
@@ -60,11 +65,19 @@ public class TaskConfigPanel extends JPanel {
 		nameTF = new JTextField(15);
 		JLabel manL = new JLabel("Worker:");
 		manCB = new JComboBox(new DefaultComboBoxModel(_model._mans));
-		JLabel durationL = new JLabel("Duration:");
-		durationSP = new JSpinner(new SpinnerNumberModel((int)_task.getDuration(), 1, 365, 1));
+		JLabel durationL = new JLabel("Planed Duration:");
+		planedSP = new JSpinner(new SpinnerNumberModel((int)_task.getDuration(), 1, 365, 1));
+		JLabel usedL = new JLabel("Actual Duration:");
+		actualSP = new JSpinner(new SpinnerNumberModel((int)_task.getActualDuration(), 0, 365, 1));
 		JLabel colorL = new JLabel("Color Label:");
 		_colorLabelCB = new JComboBox(new DefaultComboBoxModel(ColorLabel.COLOR_LABELS));
 		_colorLabelCB.setRenderer(new ColorLabelRenderer(_colorLabelCB.getRenderer()));
+		// Comment
+		JLabel commentL = new JLabel("Comment:");
+		commentTA = new JTextArea( 5, 20 );
+		commentTA.setLineWrap( true );
+		JScrollPane scrollPane = new JScrollPane(commentTA); 
+		
 		
 		//layout components
 		contentP.setLayout(new GridBagLayout());
@@ -78,8 +91,12 @@ public class TaskConfigPanel extends JPanel {
 		//
 		contentP.add(nameL, gc);
 		gc.gridy++; contentP.add(durationL, gc);
+		gc.gridy++; contentP.add(usedL, gc);
 		gc.gridy++; contentP.add(manL, gc);
 		gc.gridy++; contentP.add(colorL, gc);
+		gc.anchor = GridBagConstraints.NORTHEAST;
+		gc.gridy++; contentP.add(commentL, gc);
+		gc.anchor = GridBagConstraints.EAST;
 		
 		// add edit fields
 		gc.gridx++; gc.gridy=0;
@@ -88,13 +105,19 @@ public class TaskConfigPanel extends JPanel {
 		gc.insets.left = 8;
 		//
 		contentP.add(nameTF, gc);
-		gc.gridy++; contentP.add(durationSP, gc);		
+		gc.gridy++; contentP.add(planedSP, gc);
+		gc.gridy++; contentP.add(actualSP, gc);
 		gc.gridy++; contentP.add(manCB, gc);
 		gc.gridy++; contentP.add(_colorLabelCB, gc);
+		gc.fill = GridBagConstraints.BOTH;
+		gc.weighty = 1;
+		gc.gridy++; contentP.add(scrollPane, gc);
 		
 		// set component properties
 		nameTF.setText(_task.getName());
 		manCB.setSelectedItem(_task.getMan());
+		commentTA.setText( _task.getComment() );
+		commentTA.setCaretPosition( 0 );
 		if(_task.getColorLabel() != null) {
 			_colorLabelCB.setSelectedItem(_task.getColorLabel());
 		}

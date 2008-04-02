@@ -109,11 +109,11 @@ class TaskLayouter {
 			for (Task t : row._tasks) {
 
 				double left = _graph.timeToX(t.getStartTime());
-				double width = t.getRealDuration() * _graph._dayWidth;
+				double widthPlaned = t.getRealDuration() * _graph._dayWidth;
 				double top = rowTop + TaskGraphComponent.CONN_PADDING_FACTOR;
 				double height = _rowHeight
 						- TaskGraphComponent.CONN_PADDING_FACTOR;
-				t._bounds.setBounds((int) left+2, (int) top, (int) width-4,
+				t._bounds.setBounds((int) left+2, (int) top, (int) widthPlaned-4,
 						(int) height);
 			}
 			rowIndex++;

@@ -35,6 +35,10 @@ public class TaskModelImpl implements TaskGraphModel{
 	public long getTaskDuration(Object task) {
 		return ((TaskImpl)task).getDuration();
 	}
+	
+	public long getTaskActualDuration(Object task) {
+		return ((TaskImpl)task).getActualDuration();
+	}
 
 	public Object getTaskMan(Object task) {
 		return ((TaskImpl)task).getMan();
@@ -56,15 +60,20 @@ public class TaskModelImpl implements TaskGraphModel{
 		return ((TaskImpl)task).getName();
 	}
 	
+	public String getTaskComment(Object task) {
+		return ((TaskImpl)task).getComment();
+	}
+	
 	public static TaskModelImpl createEmptyModel() {
 		return new TaskModelImpl(new TaskImpl[0], new ManImpl[0]);
 	}
 
-	public void updateTask(Object task, Object taskMan, long startTime, long duration, Object[] precedingTasks) {
+	public void updateTask(Object task, Object taskMan, long startTime, long duration, long actualDuration, Object[] precedingTasks) {
 		TaskImpl t = (TaskImpl)task;
 		t.setMan((ManImpl)taskMan);
 		t.setStartTime(startTime);
 		t.setDuration(duration);
+		t.setActualDuration( actualDuration );
 		TaskImpl[] preds = new TaskImpl[precedingTasks.length];
 		for(int i = 0; i < precedingTasks.length; i++) {
 			preds[i] = (TaskImpl)precedingTasks[i];

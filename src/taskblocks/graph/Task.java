@@ -44,11 +44,16 @@ class Task extends GraphObject {
 	/** How many working days the task takes */
 	private long _duration;
 	
+	/** How many working days the task takes */
+	private long _actualDuration;
+	
 	/** When the task starts */
 	private long _startTime;
 	
 	/** Finish time is automatically counted from startTime and duration */
 	private long _finishTime;
+	
+	private String _comment;
 	
 	/** Bouds of the displayed task rectangle (in pixels, on the TaskGraphComponent) */
 	Rectangle _bounds = new Rectangle();
@@ -78,7 +83,22 @@ class Task extends GraphObject {
 	public long getDuration() {
 		return _duration;
 	}
+	
+	public long getActualDuration() {
+		return _actualDuration;
+	}
 
+	public void setDuration(long duration, long actual) {
+		long oldDuration = _duration;
+		this._duration = duration;
+		long oldActualDuration = _actualDuration;
+		this._actualDuration = actual;
+		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		if( (oldDuration != _duration) || (oldActualDuration != _actualDuration) ){
+			_builder.setDirty();
+		}
+	}
+	
 	public void setDuration(long duration) {
 		long oldDuration = _duration;
 		this._duration = duration;
@@ -112,6 +132,14 @@ class Task extends GraphObject {
 	
 	public TaskRow getRow() {
 		return _row;
+	}
+
+	public void setComment( String comment ){
+		_comment = comment;
+	}
+	
+	public String getComment() {
+		return _comment;
 	}
 
 }

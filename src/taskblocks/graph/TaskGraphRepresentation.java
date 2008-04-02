@@ -98,8 +98,9 @@ public class TaskGraphRepresentation {
 				}
 				// task -> row mapping
 				t._row = row;
-				t.setDuration(_model.getTaskDuration(t._userObject));
+				t.setDuration(_model.getTaskDuration(t._userObject), _model.getTaskActualDuration(t._userObject));
 				t.setStartTime(_model.getTaskStartTime(t._userObject));
+				t.setComment( _model.getTaskComment(t._userObject) );
 				
 				// we must initialize these arrays, so we don't care about nulls later
 				t._incommingConnections = new Connection[0];
@@ -305,7 +306,8 @@ public class TaskGraphRepresentation {
 			for(int i = 0; i < t._incommingConnections.length; i++) {
 				preceedingTasksUserObjs[i] = t._incommingConnections[i]._fromTask._userObject;
 			}
-			_model.updateTask(t._userObject, t._row._userManObject, t.getStartTime(), t.getDuration(), preceedingTasksUserObjs);
+			
+			_model.updateTask(t._userObject, t._row._userManObject, t.getStartTime(), t.getDuration(), t.getActualDuration(), preceedingTasksUserObjs);
 		}
 	}
 	

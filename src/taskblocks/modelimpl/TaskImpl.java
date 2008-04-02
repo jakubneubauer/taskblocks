@@ -28,8 +28,10 @@ public class TaskImpl {
 	private String _name;
 	private long _startTime;
 	private long _duration;
+    private long _actualDuration;
 	private TaskImpl[] _predecessors;
 	private ManImpl _man;
+	private String _comment;
 	
 	private ColorLabel _colorLabel;
 	
@@ -44,6 +46,16 @@ public class TaskImpl {
 			_duration = 1;
 		}
 		this._duration = _duration;
+	}
+    
+	public long getActualDuration() {
+		return _actualDuration;
+	}
+	public void setActualDuration(long _used) {
+		if(_used < 0) {
+			_used = 0;
+		}
+		this._actualDuration = _used;
 	}
 	public String getName() {
 		return _name;
@@ -86,5 +98,16 @@ public class TaskImpl {
 	}
 	public void setColorLabel(ColorLabel cl) {
 		_colorLabel = cl;
+	}
+	
+	public void setComment( String comment ){
+		if( comment == null ){
+			comment = "";
+		}
+		_comment = comment;
+	}
+	
+	public String getComment(){
+		return _comment;
 	}
 }

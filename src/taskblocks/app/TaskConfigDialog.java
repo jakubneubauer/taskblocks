@@ -47,10 +47,12 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 	}
 
 	public void updateTask(TaskImpl task) {
-		task.setDuration(((Integer)_cfgPanel.durationSP.getValue()).intValue());
+		task.setDuration(((Integer)_cfgPanel.planedSP.getValue()).intValue());
+		task.setActualDuration(((Integer)_cfgPanel.actualSP.getValue()).intValue());
 		task.setName(_cfgPanel.nameTF.getText());
 		task.setMan(((ManImpl)_cfgPanel.manCB.getSelectedItem()));
 		task.setColorLabel((ColorLabel)_cfgPanel._colorLabelCB.getSelectedItem());
+		task.setComment( _cfgPanel.commentTA.getText() );
 		_applied = true;
 	}
 	
@@ -101,6 +103,8 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 			_task.setPredecessors(new TaskImpl[0]);
 			_task.setMan(_model._mans[0]);
 			_task.setDuration(5);
+            _task.setActualDuration( 0 );
+            _task.setComment( "" );
 		} else {
 			setTitle("Task " + _task.getName());
 		}
