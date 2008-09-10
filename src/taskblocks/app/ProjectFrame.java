@@ -33,6 +33,8 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import javax.swing.Action;
 import javax.swing.Box;
@@ -72,6 +74,9 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	File _file;
 	boolean _newCleanProject;
 	JCheckBoxMenuItem _myWindowMenuItem;
+	
+	Preferences _prefs = Preferences.userNodeForPackage(this.getClass());
+
 	
 	Action _shrinkAction = new MyAction("Shrink", TaskBlocks.getImage("shrink.png"), "Shrink tasks as near as possible") {
 		public void actionPerformed(ActionEvent e) {
@@ -121,6 +126,17 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			}
 		}
 	};
+	
+	class OpenRecentFileAction extends MyAction {
+		String _path;
+		public OpenRecentFileAction(String path) {
+			super(path);
+			_path = path;
+		}
+		public void actionPerformed(ActionEvent e) {
+			openFile(new File(_path));
+		}
+	}
 	
 	Action _newFileAction = new MyAction("New Project") {
 		public void actionPerformed(ActionEvent e) {
@@ -344,6 +360,8 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menuFile.add(_saveAction).setAccelerator(getAcceleratorStroke('S'));
 		menuFile.add(_saveAsAction);
 		menuFile.add(new JSeparator());
+		fillRecentFilesMenu(menuFile);
+		menuFile.add(new JSeparator());
 		menuFile.add(_closeFileAction).setAccelerator(getAcceleratorStroke('W'));
 		menu.add(menuFile);
 		
@@ -414,6 +432,44 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	}
 	
+	private void fillRecentFilesMenu(JMenu menuFile) {
+		try {
+			Preferences p = _prefs.node("recentFiles");
+			for(String child: p.childrenNames()) {
+				String path = p.node(child).get("path", null);
+				if(path != null) {
+					menuFile.add(new OpenRecentFileAction(path));
+				}
+			}
+		} catch (BackingStoreException e) {
+			// NOTHING TO DO
+		}
+	}
+
+	private void addToRecentFiles(File f) {
+		try {
+			Preferences p = _prefs.node("recentFiles");
+			String[] childs = p.childrenNames();
+			for(String child: childs) {
+				String path = p.node(child).get("path", null);
+				if(path != null) {
+					if(path.equals(f.getAbsolutePath())) {
+						// is already in recent list - do nothing
+						return;
+					}
+				}
+			}
+			if(childs.length >= 5) {
+				p.node(childs[0]).removeNode();
+			}
+			Preferences newNode = p.node(String.valueOf(System.currentTimeMillis()));
+			newNode.put("path", f.getAbsolutePath());
+			
+		} catch (BackingStoreException e) {
+			// NOTHING TO DO
+		}
+	}
+
 	private KeyStroke getAcceleratorStroke(char key) {
 		return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 	}
@@ -424,6 +480,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	private void setFile(File f) {
 		_file = f;
 		setTitle(_file.getName());
+		addToRecentFiles(f);
 	}
 
 	private void tryClose() {
@@ -482,7 +539,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			// ask for file
 			if(TaskBlocks.RUNNING_ON_MAC || TaskBlocks.RUNNING_ON_WINDOWS) {
 				// MacOS user feeling
-				FileDialog fd = new FileDialog(ProjectFrame.this, "blabla", FileDialog.SAVE);
+				FileDialog fd = new FileDialog(ProjectFrame.this, "Save", FileDialog.SAVE);
 				fd.setVisible(true);
 				if(fd.getFile() != null) {
 					f = new File(fd.getDirectory(), fd.getFile());
