@@ -36,8 +36,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import taskblocks.Pair;
-import taskblocks.Utils;
+import taskblocks.utils.Pair;
+import taskblocks.utils.Utils;
 
 public class GraphMouseHandler implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
@@ -283,7 +283,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 			String taskName = _graph._model.getTaskName(t._userObject);
 			DateFormat df = new SimpleDateFormat("d.M.");
 			String start = df.format(new Date(t.getStartTime() * Utils.MILLISECONDS_PER_DAY));
-			String end = df.format(new Date(t.getFinishTime() * Utils.MILLISECONDS_PER_DAY));
+			String end = df.format(new Date(t.getFinishTimeForTooltip() * Utils.MILLISECONDS_PER_DAY));
 			String duration = String.valueOf(t.getDuration());
 			String comment = t.getComment();
 			_graph.setToolTipText("<html><p style=\"padding:2 5 2 5;\"><b>" + taskName + "</b><br>Start: " + start + "&nbsp;&nbsp;&nbsp;End: " + end + "<br>Duration: " + duration + " days<br>Comment: "+comment);

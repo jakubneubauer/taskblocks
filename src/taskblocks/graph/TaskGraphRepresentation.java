@@ -26,7 +26,7 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
-import taskblocks.ArrayUtils;
+import taskblocks.utils.ArrayUtils;
 
 /**
  * helper class used to build the data structure from task graph model.
@@ -39,7 +39,7 @@ public class TaskGraphRepresentation {
 	
 	Connection[] _connections;
 	
-	TaskGraphModel _model;
+	TaskModel _model;
 	
 	/** Used internally when shifting tasks */
 	boolean _somethingMoved;
@@ -52,7 +52,7 @@ public class TaskGraphRepresentation {
 	/** Used to recognize if the project has been changed since loaded from file */
 	private boolean _saveDirty;
 	
-	TaskGraphRepresentation(TaskGraphModel model) {
+	TaskGraphRepresentation(TaskModel model) {
 		_model = model;
 	}
 

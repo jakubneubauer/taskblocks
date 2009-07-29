@@ -21,8 +21,8 @@ package taskblocks.graph;
 
 import java.awt.Rectangle;
 
-import taskblocks.ArrayUtils;
-import taskblocks.Utils;
+import taskblocks.utils.ArrayUtils;
+import taskblocks.utils.Utils;
 
 /**
  * Representation of task displayed in TaskGraphComponent. Used internally by TaskGraphComponent.
@@ -50,15 +50,17 @@ class Task extends GraphObject {
 	/** When the task starts */
 	private long _startTime;
 	
-	/** Finish time is automatically counted from startTime and duration */
+	/** Finish time (counted mathematically. So, for example 1 day task finishes at start-time + 1) . Is automatically counted from startTime and duration */
 	private long _finishTime;
+	/** Finish time (counted for human. So, for example 1 day task finishes at the same day as it starts) */
+	private long _finishTimeForTooltip;
 	
 	private String _comment;
 	
 	/** Bouds of the displayed task rectangle (in pixels, on the TaskGraphComponent) */
 	Rectangle _bounds = new Rectangle();
 	
-	/** 1 bit information used in algorythms traversing through the task dependency graph */
+	/** 1 bit information used in algorithms traversing through the task dependency graph */
 	boolean _flag;
 	
 	TaskGraphRepresentation _builder;
@@ -94,6 +96,7 @@ class Task extends GraphObject {
 		long oldActualDuration = _actualDuration;
 		this._actualDuration = actual;
 		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTimeForTooltip = _finishTime-1;
 		if( (oldDuration != _duration) || (oldActualDuration != _actualDuration) ){
 			_builder.setDirty();
 		}
@@ -103,6 +106,7 @@ class Task extends GraphObject {
 		long oldDuration = _duration;
 		this._duration = duration;
 		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTimeForTooltip = _finishTime-1;
 		if(oldDuration != _duration) {
 			_builder.setDirty();
 		}
@@ -110,6 +114,9 @@ class Task extends GraphObject {
 
 	public long getFinishTime() {
 		return _finishTime;
+	}
+	public long getFinishTimeForTooltip() {
+		return _finishTimeForTooltip;
 	}
 
 	public long getStartTime() {
@@ -121,6 +128,7 @@ class Task extends GraphObject {
 		_startTime = time;
 		repairStartTime();
 		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTimeForTooltip = _finishTime-1;
 		if(_startTime != oldTime) {
 			_builder.setDirty();
 		}

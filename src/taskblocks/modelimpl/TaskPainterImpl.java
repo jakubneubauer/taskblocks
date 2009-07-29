@@ -24,9 +24,9 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-import taskblocks.Colors;
-import taskblocks.Utils;
 import taskblocks.graph.TaskGraphPainter;
+import taskblocks.utils.Colors;
+import taskblocks.utils.Utils;
 
 public class TaskPainterImpl implements TaskGraphPainter {
 
@@ -58,18 +58,19 @@ public class TaskPainterImpl implements TaskGraphPainter {
 			g2.setColor(_taskBorderCol);
 		}
 		g2.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 5, 5);
-		
-		// percentage of actual duration/planned duration:
-		int right = bounds.x + (int)((bounds.width+4) * percentage)-5;
-		g2.setColor(_taskBorderCol);
-		g2.drawLine(bounds.x+1, bounds.y+4, bounds.x + bounds.width-1	, bounds.y+4);
-		if(percentage > 0) {
-			//g2.drawLine(bounds.x+1, bounds.y+4, right, bounds.y+4);
-			g2.setColor(new Color(0,0,0,150));
-			g2.drawLine(bounds.x+1, bounds.y+3, right, bounds.y+3);
-			g2.drawLine(bounds.x+1, bounds.y+2, right, bounds.y+2);
-			g2.drawLine(bounds.x+1, bounds.y+1, right, bounds.y+1);
-		}
+
+// TODO: Actual Duration. For now disabled
+//		// percentage of actual duration/planned duration:
+//		int right = bounds.x + (int)((bounds.width+4) * percentage)-5;
+//		g2.setColor(_taskBorderCol);
+//		g2.drawLine(bounds.x+1, bounds.y+4, bounds.x + bounds.width-1	, bounds.y+4);
+//		if(percentage > 0) {
+//			//g2.drawLine(bounds.x+1, bounds.y+4, right, bounds.y+4);
+//			g2.setColor(new Color(0,0,0,150));
+//			g2.drawLine(bounds.x+1, bounds.y+3, right, bounds.y+3);
+//			g2.drawLine(bounds.x+1, bounds.y+2, right, bounds.y+2);
+//			g2.drawLine(bounds.x+1, bounds.y+1, right, bounds.y+1);
+//		}
 		
 		Rectangle oldClips = g2.getClipBounds();
 		g2.setColor(Color.black);

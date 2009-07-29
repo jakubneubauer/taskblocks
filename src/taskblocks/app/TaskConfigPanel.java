@@ -47,9 +47,10 @@ public class TaskConfigPanel extends JPanel {
 	
 	JComboBox manCB;
 	JTextField nameTF;
+	JTextField bugIdTF;
 	JSpinner planedSP;
 	JSpinner actualSP;
-	JComboBox _colorLabelCB;
+	JComboBox colorLabelCB;
 	JTextArea commentTA;
 	
 	public TaskConfigPanel(TaskImpl task, TaskModelImpl model) {
@@ -67,13 +68,17 @@ public class TaskConfigPanel extends JPanel {
 		manCB = new JComboBox(new DefaultComboBoxModel(_model._mans));
 		JLabel durationL = new JLabel("Planed Duration:");
 		planedSP = new JSpinner(new SpinnerNumberModel((int)_task.getDuration(), 1, 365, 1));
-		JLabel usedL = new JLabel("Actual Duration:");
+		JLabel actualDurL = new JLabel("Actual Duration:");
 		actualSP = new JSpinner(new SpinnerNumberModel((int)_task.getActualDuration(), 0, 365, 1));
 		JLabel colorL = new JLabel("Color Label:");
-		_colorLabelCB = new JComboBox(new DefaultComboBoxModel(ColorLabel.COLOR_LABELS));
-		_colorLabelCB.setRenderer(new ColorLabelRenderer(_colorLabelCB.getRenderer()));
+		colorLabelCB = new JComboBox(new DefaultComboBoxModel(ColorLabel.COLOR_LABELS));
+		colorLabelCB.setRenderer(new ColorLabelRenderer(colorLabelCB.getRenderer()));
+		JLabel bugIdL = new JLabel("Bugzilla ID:");
+		bugIdL.setForeground(Color.GRAY);
+		bugIdTF = new JTextField(15);
 		// Comment
 		JLabel commentL = new JLabel("Comment:");
+		commentL.setForeground(Color.GRAY);
 		commentTA = new JTextArea( 5, 20 );
 		commentTA.setLineWrap( true );
 		JScrollPane scrollPane = new JScrollPane(commentTA); 
@@ -91,9 +96,11 @@ public class TaskConfigPanel extends JPanel {
 		//
 		contentP.add(nameL, gc);
 		gc.gridy++; contentP.add(durationL, gc);
-		gc.gridy++; contentP.add(usedL, gc);
+		// TODO: Actual Duration. For now disabled
+		//gc.gridy++; contentP.add(actualDurL, gc);
 		gc.gridy++; contentP.add(manL, gc);
 		gc.gridy++; contentP.add(colorL, gc);
+		gc.gridy++; contentP.add(bugIdL, gc);
 		gc.anchor = GridBagConstraints.NORTHEAST;
 		gc.gridy++; contentP.add(commentL, gc);
 		gc.anchor = GridBagConstraints.EAST;
@@ -106,9 +113,11 @@ public class TaskConfigPanel extends JPanel {
 		//
 		contentP.add(nameTF, gc);
 		gc.gridy++; contentP.add(planedSP, gc);
-		gc.gridy++; contentP.add(actualSP, gc);
+		// TODO: Actual Duration. For now disabled
+		//gc.gridy++; contentP.add(actualSP, gc);
 		gc.gridy++; contentP.add(manCB, gc);
-		gc.gridy++; contentP.add(_colorLabelCB, gc);
+		gc.gridy++; contentP.add(colorLabelCB, gc);
+		gc.gridy++; contentP.add(bugIdTF, gc);
 		gc.fill = GridBagConstraints.BOTH;
 		gc.weighty = 1;
 		gc.gridy++; contentP.add(scrollPane, gc);
@@ -116,10 +125,11 @@ public class TaskConfigPanel extends JPanel {
 		// set component properties
 		nameTF.setText(_task.getName());
 		manCB.setSelectedItem(_task.getMan());
+		bugIdTF.setText(_task.getBugId());
 		commentTA.setText( _task.getComment() );
 		commentTA.setCaretPosition( 0 );
 		if(_task.getColorLabel() != null) {
-			_colorLabelCB.setSelectedItem(_task.getColorLabel());
+			colorLabelCB.setSelectedItem(_task.getColorLabel());
 		}
 	}
 	

@@ -75,9 +75,9 @@ public class BugzillaSubmitterTest extends TestCase {
 	
 	public void testQuery() {
 		try {
-			String result = new BugzillaSubmitter().query("http://wi", "j.neubauer@gmc.net", "abba", new String[] {"31396", "31397"});
+			Map<String, Map<String, String>> result = new BugzillaSubmitter().query("http://wi", "j.neubauer@gmc.net", "abba", new String[] {"31396", "31397"});
 			
-			System.out.println(result);
+			System.out.println(result.toString());
 		} catch (MalformedURLException e) {
 			System.err.println(e.getMessage());
 			System.exit(2);

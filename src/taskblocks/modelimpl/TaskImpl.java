@@ -21,7 +21,7 @@ package taskblocks.modelimpl;
 
 import java.awt.Color;
 
-import taskblocks.Colors;
+import taskblocks.utils.Colors;
 
 public class TaskImpl {
 	
@@ -34,6 +34,9 @@ public class TaskImpl {
 	private String _comment;
 	
 	private ColorLabel _colorLabel;
+	
+	/** Used for bugzilla export */
+	private String _bugId;
 	
 	/** Used only when saving */
 	public String _id;
@@ -63,7 +66,7 @@ public class TaskImpl {
 	public void setName(String _name) {
 		this._name = _name;
 	}
-	public long geSstartTime() {
+	public long geStartTime() {
 		return _startTime;
 	}
 	public void setStartTime(long time) {
@@ -109,5 +112,13 @@ public class TaskImpl {
 	
 	public String getComment(){
 		return _comment;
+	}
+	
+	public String getBugId() {
+		return _bugId;
+	}
+	
+	public void setBugId(String bugId) {
+		_bugId = bugId;
 	}
 }

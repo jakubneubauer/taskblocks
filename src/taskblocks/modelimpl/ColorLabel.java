@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import taskblocks.Colors;
+import taskblocks.utils.Colors;
 
 public class ColorLabel {
 	

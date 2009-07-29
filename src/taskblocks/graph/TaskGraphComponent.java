@@ -44,9 +44,9 @@ import javax.swing.JScrollBar;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeListener;
 
-import taskblocks.Colors;
-import taskblocks.Pair;
-import taskblocks.Utils;
+import taskblocks.utils.Colors;
+import taskblocks.utils.Pair;
+import taskblocks.utils.Utils;
 
 public class TaskGraphComponent extends JComponent implements ComponentListener, AdjustmentListener {
 	
@@ -66,7 +66,7 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 	 * original mode of tasks. It is not updated when doing changes in graph. Explicit
 	 * call of {@link TaskGraphRepresentation#updateModel()} must be done.
 	 */
-	TaskGraphModel _model;
+	TaskModel _model;
 	
 	/**
 	 * This is the representation of Graph data (tasks and rows). It has more pre-counted
@@ -110,7 +110,7 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 	
 	int _scrollTop;
 	
-	public TaskGraphComponent(TaskGraphModel model, TaskGraphPainter painter) {
+	public TaskGraphComponent(TaskModel model, TaskGraphPainter painter) {
 		_painter = painter;
 
 		setModel(model);
@@ -344,7 +344,7 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 		repaint();
 	}
 	
-	public void setModel(TaskGraphModel model) {
+	public void setModel(TaskModel model) {
 		if(model == _model) {
 			// just rebuilds the model
 			_builder.buildFromModel();

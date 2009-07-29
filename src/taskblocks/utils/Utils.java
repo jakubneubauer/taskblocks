@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package taskblocks;
+package taskblocks.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +111,10 @@ public class Utils {
 	 * @return
 	 */
 	public static String getFirstElemText(Element parent, String childName) {
-		return null; // TODO
+		Element[] childs = getChilds(parent, childName);
+		if(childs.length == 0) {
+			return null;
+		}
+		return childs[0].getTextContent();
 	}
-
 }

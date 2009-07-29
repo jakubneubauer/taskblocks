@@ -19,10 +19,10 @@
 
 package taskblocks.modelimpl;
 
-import taskblocks.ArrayUtils;
-import taskblocks.graph.TaskGraphModel;
+import taskblocks.graph.TaskModel;
+import taskblocks.utils.ArrayUtils;
 
-public class TaskModelImpl implements TaskGraphModel{
+public class TaskModelImpl implements TaskModel{
 	
 	public TaskImpl[] _tasks;
 	public ManImpl[] _mans;
@@ -49,7 +49,7 @@ public class TaskModelImpl implements TaskGraphModel{
 	}
 
 	public long getTaskStartTime(Object task) {
-		return ((TaskImpl)task).geSstartTime();
+		return ((TaskImpl)task).geStartTime();
 	}
 
 	public Object[] getTasks() {

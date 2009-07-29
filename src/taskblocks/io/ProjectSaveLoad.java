@@ -42,12 +42,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import taskblocks.Pair;
-import taskblocks.Utils;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
+import taskblocks.utils.Pair;
+import taskblocks.utils.Utils;
 
 /**
  * Used to load/save the task project model
@@ -74,6 +74,8 @@ public class ProjectSaveLoad {
 	public static final String PRED_A = "pred";
 	public static final String COLOR_A = "color";
 	public static final String COMM_A = "comment";
+	// Id in Bugzilla, used when exporting to it.
+	public static final String BUGID_A = "bugid";
 	
 	TaskModelImpl _model;
 	Map<String, TaskImpl> _taskIds;
@@ -94,7 +96,7 @@ public class ProjectSaveLoad {
 			doc = dbf.newDocumentBuilder().parse(f);
 			Element rootE = doc.getDocumentElement();
 			if(!TASKMAN_E.equals(rootE.getNodeName())) {
-				throw new WrongDataException("Document is not TaskManager project");
+				throw new WrongDataException("Document is not TaskBlocks project");
 			}
 			
 			// mapping ID -> ManImpl
@@ -129,6 +131,7 @@ public class ProjectSaveLoad {
 					if(usedStr != null && usedStr.trim().length() > 0) {
 						taskUsed = Long.valueOf(taskE.getAttribute(ACTUAL_A));
 					}
+					String bugId = taskE.getAttribute(BUGID_A);
 					String colorTxt = taskE.getAttribute(COLOR_A);
 					String comment = taskE.getAttribute(COMM_A);
 					String taskManId = taskE.getAttribute(MAN_A);
@@ -138,6 +141,10 @@ public class ProjectSaveLoad {
 						throw new WrongDataException("Task with id " + taskId + " is not assigned to any man");
 					}
 					
+					if(bugId != null && bugId.length() == 0) {
+						bugId = null;
+					}
+					
 					TaskImpl task = new TaskImpl();
 					task.setName(taskName);
 					task.setStartTime(taskStart);
@@ -145,6 +152,7 @@ public class ProjectSaveLoad {
 					task.setActualDuration(taskUsed);
 					task.setMan(man);
 					task.setComment( comment );
+					task.setBugId(bugId);
 					if(colorTxt != null && colorTxt.length() > 0) {
 						int colorIndex = Integer.parseInt(colorTxt);
 						if(colorIndex >= 0 && colorIndex < ColorLabel.COLOR_LABELS.length) {
@@ -191,7 +199,7 @@ public class ProjectSaveLoad {
 		} catch (IOException e) {
 			throw new WrongDataException("Can't read file: " + e.getMessage(), e);
 		} catch (ParserConfigurationException e) {
-			throw new WrongDataException("Document is not TaskManager project", e);
+			throw new WrongDataException("Document is not TaskBlocks project", e);
 		}
 	}
 	
@@ -227,8 +235,8 @@ public class ProjectSaveLoad {
 		Set<ManImpl> mans = new HashSet<ManImpl>();
 
 		// generate list of mans
-		for(TaskImpl t: _model._tasks) {
-			mans.add(t.getMan());
+		for(ManImpl m: _model._mans) {
+			mans.add(m);
 		}
 		
 		// generate task and man ids
@@ -274,6 +282,9 @@ public class ProjectSaveLoad {
 		taskE.setAttribute(COMM_A, t.getComment());
 		if(t.getColorLabel() != null) {
 			taskE.setAttribute(COLOR_A, String.valueOf(t.getColorLabel()._index));
+		}
+		if(t.getBugId() != null && t.getBugId().length() > 0) {
+			taskE.setAttribute(BUGID_A, t.getBugId());
 		}
 		
 		// save predecessors

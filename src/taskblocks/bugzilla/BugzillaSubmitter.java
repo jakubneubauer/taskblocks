@@ -32,14 +32,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -47,7 +44,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import taskblocks.Utils;
+import taskblocks.utils.Utils;
 
 /**
  * Instances of this class can submit new bugs to Bugzilla.
@@ -57,6 +54,8 @@ import taskblocks.Utils;
  * @author j.neubauer
  */
 public class BugzillaSubmitter {
+	
+	public static final String BUGID = "bug_id";
 
 	/** Bug property name */
 	public static final String KEYWORDS = "keywords";
@@ -97,8 +96,14 @@ public class BugzillaSubmitter {
 	/** Bug property name */
 	public static final String DESCRIPTION = "comment";
 
-	/** Bug property name */
+	/** Bug property name (aka Original estimation) */
 	public static final String ESTIMATED_TIME = "estimated_time";
+	
+	/** Bug property name (aka Hours left) */
+	public static final String REMAINING_TIME = "remaining_time";
+	
+	/** Bug property name (aka Current estimation) */
+	public static final String ACTUAL_TIME = "actual_time";
 
 	/** Bug property name */
 	public static final String BLOCKS = "blocked";
@@ -110,7 +115,8 @@ public class BugzillaSubmitter {
 	 * Regular expression used to parse output from bugzilla and to find the submitted bug id.
 	 * if not found, it is supposed that error occured.
 	 */
-	public String _successRegexp = "Bug ([0-9]+) Submitted";
+	public String _successRegexpForSubmit = "Bug ([0-9]+) Submitted";
+	public String _successRegexpForChange = "Changes submitted for";
 	
 	/**
 	 * Regular expression used to find title of the error if submission doesn't
@@ -165,22 +171,27 @@ public class BugzillaSubmitter {
 
 		// URL must use the http protocol!
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("POST");
-		conn.setAllowUserInteraction(false); // you may not ask the user
-		conn.setDoOutput(true); // we want to send things
-		// the Content-type should be default, but we set it anyway
-		conn.setRequestProperty("Content-type",
-				"application/x-www-form-urlencoded; charset=utf-8");
-		// the content-length should not be necessary, but we're cautious
-		conn.setRequestProperty("Content-length", Integer.toString(body.length()));
-
-		// get the output stream to POST our form data
-		OutputStream rawOutStream = conn.getOutputStream();
-		PrintWriter pw = new PrintWriter(rawOutStream);
-
-		pw.print(body); // here we "send" our body!
-		pw.flush();
-		pw.close();
+		
+		if(body != null) {
+			conn.setRequestMethod("POST");
+			conn.setAllowUserInteraction(false); // you may not ask the user
+			conn.setDoOutput(true); // we want to send things
+			// the Content-type should be default, but we set it anyway
+			conn.setRequestProperty("Content-type",
+					"application/x-www-form-urlencoded; charset=utf-8");
+			// the content-length should not be necessary, but we're cautious
+			conn.setRequestProperty("Content-length", Integer.toString(body.length()));
+	
+			// get the output stream to POST our form data
+			OutputStream rawOutStream = conn.getOutputStream();
+			PrintWriter pw = new PrintWriter(rawOutStream);
+	
+			pw.print(body); // here we "send" our body!
+			pw.flush();
+			pw.close();
+		} else {
+			// ?
+		}
 
 		// get the input stream for reading the reply
 		// IMPORTANT! Your body will not get transmitted if you get the
@@ -215,7 +226,7 @@ public class BugzillaSubmitter {
 	 * extracted by parsing the result html page with regular expressions
 	 * {@link #_errTitleRegexp}, {@link #_errDetailRegexp} and {@link #_errDetailRemovalRegexps}.
 	 * Bug submission success is recognized by parsing output and finding bug id with
-	 * regular expressiont {@link #_successRegexp}.
+	 * regular expressiont {@link #_successRegexpForSubmit}.
 	 * 
 	 * 
 	 * @param baseUrl
@@ -251,7 +262,7 @@ public class BugzillaSubmitter {
 		String result = submit(new URL(baseUrl + "/post_bug.cgi"), formBody);
 		// System.out.println(result);
 
-		Matcher m = Pattern.compile(_successRegexp).matcher(result);
+		Matcher m = Pattern.compile(_successRegexpForSubmit).matcher(result);
 		if (m.find()) {
 			String bugId = m.group(1);
 			return bugId;
@@ -279,10 +290,57 @@ public class BugzillaSubmitter {
 			throw new Exception(errText + ": " + errText2);
 		}
 	}
+
+	public void change(String baseUrl, String user, String password,
+			String bugId, Map<String, String> properties) throws Exception {
+
+		// fill in bug id
+		properties.put("id", bugId);
+
+		// authentication
+		//properties.put("form_name", "enter_bug");
+		properties.put("Bugzilla_login", user);
+		properties.put("Bugzilla_password", password);
+		properties.put("GoAheadAndLogIn", "1");
+
+		String formBody = buildFormBody(properties);
+		String result = submit(new URL(baseUrl + "/process_bug.cgi"), formBody);
+		// System.out.println(result);
+
+		Matcher m = Pattern.compile(_successRegexpForChange).matcher(result);
+		if (m.find()) {
+			return;
+		} else {
+
+			String errText = "";
+			m = Pattern.compile(_errTitleRegexp).matcher(result);
+			if (m.find()) {
+				errText = m.group(1);
+			}
+
+			String errText2 = "";
+			m = Pattern.compile(_errDetailRegexp, Pattern.DOTALL).matcher(result);
+			if (m.find()) {
+				errText2 = m.group(1);
+			}
+			if (errText2.length() > 0) {
+				for (String removeRegexp : _errDetailRemovalRegexps) {
+					errText2 = errText2.replaceAll(removeRegexp, "");
+				}
+				errText2 = errText2.replaceAll("<[^>]*>", "");
+				errText2 = errText2.replaceAll("\r?\n", " ");
+				errText2 = errText2.replaceAll(" +", " ");
+			}
+			throw new Exception(errText + ": " + errText2);
+		}
+	}
 	
-	public String query(String baseUrl, String user, String password, String[] bugs) throws MalformedURLException, IOException, SAXException, ParserConfigurationException {
+	
+	public Map<String, Map<String, String>> query(String baseUrl, String user, String password, String[] bugs) throws MalformedURLException, IOException, SAXException, ParserConfigurationException {
 		Map<String, String> formData = new HashMap<String, String>();
 		formData.put("ctype", "xml");
+		formData.put("Bugzilla_login", user);
+		formData.put("Bugzilla_password", password);
 		formData.put("excludefield", "attachmentdata");
 		String body = buildFormBody(formData);
 
@@ -301,15 +359,22 @@ public class BugzillaSubmitter {
 		if(!rootE.getNodeName().equals("bugzilla")) {
 			throw new IOException("Wrong xml answer, doesn't looks like bugzilla");
 		}
-		
-		List<Map<String, String>> bugsData = new ArrayList<Map<String,String>>();
+		Map<String, Map<String, String>> resultData = new HashMap<String, Map<String,String>>();
 		for(Element bugE: Utils.getChilds(rootE, "bug")) {
 			Map<String, String> bugData = new HashMap<String, String>();
-			fillBugData(bugE, bugData);
+			String bugId = fillBugData(bugE, bugData);
+			resultData.put(bugId, bugData);
 		}
-		return result;
+		return resultData;
 	}
 
-	private void fillBugData(Element bugE, Map<String, String> bugData) {
+	private String fillBugData(Element bugE, Map<String, String> bugData) {
+		String id = Utils.getFirstElemText(bugE, BUGID);
+		bugData.put(STATUS_WHITEBOARD, Utils.getFirstElemText(bugE, STATUS_WHITEBOARD));
+		bugData.put(ESTIMATED_TIME, Utils.getFirstElemText(bugE, ESTIMATED_TIME));
+		bugData.put(ACTUAL_TIME, Utils.getFirstElemText(bugE, ACTUAL_TIME));
+		bugData.put(REMAINING_TIME, Utils.getFirstElemText(bugE, REMAINING_TIME));
+		return id;
+		
 	}
 }

@@ -22,12 +22,12 @@ package taskblocks.app;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import taskblocks.Utils;
 import taskblocks.graph.TaskGraphComponent;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
+import taskblocks.utils.Utils;
 
 public class TaskConfigDialog extends ConfigDialogStub  {
 	
@@ -38,7 +38,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 	
 	TaskConfigPanel _cfgPanel;
 	
-	public TaskConfigDialog(JFrame owner, TaskImpl task, TaskModelImpl model, TaskGraphComponent graph, boolean isCreating) {
+	private TaskConfigDialog(JFrame owner, TaskImpl task, TaskModelImpl model, TaskGraphComponent graph, boolean isCreating) {
 		super(owner, isCreating);
 		_task = task;
 		_model = model;
@@ -46,23 +46,24 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		init();
 	}
 
-	public void updateTask(TaskImpl task) {
+	private void fillTask(TaskImpl task) {
 		task.setDuration(((Integer)_cfgPanel.planedSP.getValue()).intValue());
 		task.setActualDuration(((Integer)_cfgPanel.actualSP.getValue()).intValue());
 		task.setName(_cfgPanel.nameTF.getText());
+		task.setBugId(_cfgPanel.bugIdTF.getText());
 		task.setMan(((ManImpl)_cfgPanel.manCB.getSelectedItem()));
-		task.setColorLabel((ColorLabel)_cfgPanel._colorLabelCB.getSelectedItem());
+		task.setColorLabel((ColorLabel)_cfgPanel.colorLabelCB.getSelectedItem());
 		task.setComment( _cfgPanel.commentTA.getText() );
 		_applied = true;
 	}
 	
-	public void addTask() {
+	private void addTask() {
 		
 		_graph.getGraphRepresentation().updateModel();
 		
 		TaskImpl t = new TaskImpl();
 		
-		updateTask(t);
+		fillTask(t);
 //		t.setDuration(((Integer)_cfgPanel.durationSP.getValue()).intValue());
 //		t.setName(_cfgPanel.nameTF.getText());
 //		t.setMan(((ManImpl)_cfgPanel.manCB.getSelectedItem()));
@@ -71,7 +72,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		long lastFinishTime = 0;
 		for(TaskImpl tmpTask: _model._tasks) {
 			if(t.getMan() == tmpTask.getMan()) {
-				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geSstartTime()), tmpTask.getDuration());
+				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getDuration());
 				if(lastFinishTime < finish) {
 					lastFinishTime = finish;
 				}
@@ -116,7 +117,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		if(isCreating()) {
 			addTask();
 		} else {
-			updateTask(_task);
+			fillTask(_task);
 		}
 	}
 	

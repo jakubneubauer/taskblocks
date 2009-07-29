@@ -26,6 +26,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -34,6 +37,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +56,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -65,18 +71,37 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 
-import taskblocks.Utils;
 import taskblocks.bugzilla.BugzillaSubmitter;
+import taskblocks.graph.TaskGraphComponent;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.TaskImpl;
+import taskblocks.utils.ArrayUtils;
+import taskblocks.utils.Utils;
 
 public class BugzillaExportDialog extends JDialog {
+	
+	String[] COL_NAMES = new String[] { "", "Bug#", "Color", "Summary", "Assignee",
+			"Estimated Time", "Remaining", "Status Whiteboard" };
+
+	Class[] COL_CLASSES = new Class[] { Boolean.class, String.class, Icon.class, String.class,
+			String.class, String.class, String.class, String.class };
+
+	int INDEX_ENABLED = 0;
+	int INDEX_BUG_ID = 1;
+	int INDEX_COLOR = 2;
+	int INDEX_NAME = 3;
+	int INDEX_MAN = 4;
+	int INDEX_HOURS = 5;
+	int INDEX_REMAINS = 6;
+	int INDEX_STATUS_WHITEBOARD = 7;
 
 	TaskImpl[] _tasks;
+	TaskGraphComponent _graph;
 
 	JTable _tasksTable;
 
 	Object[][] _tasksData;
+	TasksModel _tasksModel;
 
 	JButton okB;
 
@@ -114,10 +139,21 @@ public class BugzillaExportDialog extends JDialog {
 	
 	Preferences _prefs = Preferences.userNodeForPackage(this.getClass());
 
-	public BugzillaExportDialog(JFrame owner, TaskImpl[] tasks) {
+	private BugzillaExportDialog(JFrame owner, TaskImpl[] tasks, TaskGraphComponent graph) {
 		super(owner, "Bugzilla export", true);
 
-		_tasks = tasks;
+		_tasks = new TaskImpl[tasks.length];
+		System.arraycopy(tasks, 0, _tasks, 0, tasks.length);
+		Arrays.sort(_tasks, new Comparator<TaskImpl>(){
+			@Override
+			public int compare(TaskImpl o1, TaskImpl o2) {
+				int res = o1.getMan().getName().compareTo(o2.getMan().getName());
+				if(res != 0) {
+					return res;
+				}
+				return o1.getName().compareTo(o2.getName());
+			}});
+		_graph = graph;
 		constructData();
 		createActions();
 
@@ -168,23 +204,52 @@ public class BugzillaExportDialog extends JDialog {
 		rootPane.getActionMap().put("ESCAPE", _cancelAction);
 		//rootPane.getActionMap().put("ENTER", _okAction);
 	}
-	
-
 
 	private JPanel createMainPanel() {
 		JPanel p = new JPanel(new BorderLayout(0, 12));
-		_tasksTable = new JTable(new TasksModel()) {
+		_tasksTable = new JTable(_tasksModel = new TasksModel()) {
 			public Component prepareRenderer(TableCellRenderer renderer, int row,
 					int column) {
 				Component c = super.prepareRenderer(renderer, row, column);
 				return c;
 			}
 		};
-		//_tasksTable.setIntercellSpacing(new Dimension());
-		_tasksTable.getColumnModel().getColumn(0).setMaxWidth(25);
-		_tasksTable.getColumnModel().getColumn(0).setMinWidth(25);
-		_tasksTable.getColumnModel().getColumn(1).setMaxWidth(50);
+		_tasksTable.getColumnModel().getColumn(INDEX_ENABLED).setMaxWidth(25);
+		_tasksTable.getColumnModel().getColumn(INDEX_ENABLED).setMinWidth(25);
+		_tasksTable.getColumnModel().getColumn(INDEX_COLOR).setMaxWidth(50);
+		MouseListener popupListener = new MouseAdapter(){
+			void showPopup(MouseEvent e) {
+				JPopupMenu pm = new JPopupMenu();
+				pm.add(new AbstractAction("Select All") {
+					public void actionPerformed(ActionEvent e) {
+						selectAll(true);
+					}});
+				pm.add(new AbstractAction("Unselect All") {
+					public void actionPerformed(ActionEvent e) {
+						selectAll(false);
+					}});
+				pm.show((Component)e.getSource(), e.getX(), e.getY());
+			}
+		    public void mouseClicked(MouseEvent e) {
+		    	if(e.isPopupTrigger()) {
+		    		showPopup(e);
+		    	}
+		    }
+		    public void mousePressed(MouseEvent e) {
+		    	if(e.isPopupTrigger()) {
+		    		showPopup(e);
+		    	}
+		    }
+		    public void mouseReleased(MouseEvent e) {
+		    	if(e.isPopupTrigger()) {
+		    		showPopup(e);
+		    	}
+		    }
+		};
+		_tasksTable.addMouseListener(popupListener);
+		
 		JScrollPane sp = new JScrollPane(_tasksTable);
+		sp.addMouseListener(popupListener);
 		sp.setPreferredSize(new Dimension(700,200));
 		JPanel contentP = new JPanel();
 		p.add(sp, BorderLayout.CENTER);
@@ -331,33 +396,46 @@ public class BugzillaExportDialog extends JDialog {
 		for (int i = 0; i < _tasks.length; i++) {
 			TaskImpl task = _tasks[i];
 			long startTime = task.getStartTime() * Utils.MILLISECONDS_PER_DAY;
-			long endTime = Utils.countFinishTime(task.getStartTime(), task
-					.getDuration())
-					* Utils.MILLISECONDS_PER_DAY;
-			_tasksData[i] = new Object[6];
-			_tasksData[i][0] = new Boolean(true);
+			
+			// in bugzilla we want the end date to be the
+			// last day the worker will work on the task,
+			// not the day after (mathematically)
+			
+			long endTime = (Utils.countFinishTime(task.getStartTime(), task
+					.getDuration()) -1) * Utils.MILLISECONDS_PER_DAY;
+			_tasksData[i] = new Object[COL_NAMES.length];
+			_tasksData[i][INDEX_ENABLED] = new Boolean(true);
+			if(_tasks[i].getBugId() != null) {
+				_tasksData[i][INDEX_BUG_ID] = _tasks[i].getBugId();
+			}
 			ColorLabel taskColLabel = _tasks[i].getColorLabel();
 			if(taskColLabel == null) {
-				_tasksData[i][1] = ColorLabel.COLOR_LABELS[0]._icon;
+				_tasksData[i][INDEX_COLOR] = ColorLabel.COLOR_LABELS[0]._icon;
 			} else {
-				_tasksData[i][1] = taskColLabel._icon;
+				_tasksData[i][INDEX_COLOR] = taskColLabel._icon;
 			}
-			_tasksData[i][2] = task.getName();
-			_tasksData[i][3] = task.getMan().getName();
-			_tasksData[i][4] = new Integer(
+			_tasksData[i][INDEX_NAME] = task.getName();
+			_tasksData[i][INDEX_MAN] = task.getMan().getName();
+			_tasksData[i][INDEX_HOURS] = new Integer(
 					(int) ((double) task.getDuration() * 8d * 0.8));
-			_tasksData[i][5] = statusWhiteboardFormat.format(new Date(startTime))
+			_tasksData[i][INDEX_REMAINS] = new Integer(
+					(int) ((double) (task.getDuration()-task.getActualDuration()) * 8d * 0.8));
+			if(((Integer)_tasksData[i][INDEX_REMAINS]) < 0) {
+				_tasksData[i][INDEX_REMAINS] = 0;
+			}
+			_tasksData[i][INDEX_STATUS_WHITEBOARD] = statusWhiteboardFormat.format(new Date(startTime))
 					+ "-" + statusWhiteboardFormat.format(new Date(endTime));
 		}
 	}
+	
+	private void selectAll(boolean value) {
+		for(int i = 0; i < _tasksData.length; i++) {
+			_tasksData[i][INDEX_ENABLED] = value;
+		}
+		((TasksModel)_tasksTable.getModel()).fireTableDataChanged();
+	}
 
 	class TasksModel extends AbstractTableModel {
-
-		String[] COL_NAMES = new String[] { "", "Color", "Summary", "Assignee",
-				"Estimated Time", "Status Whiteboard" };
-
-		Class[] COL_CLASSES = new Class[] { Boolean.class, Icon.class, String.class,
-				String.class, String.class, String.class };
 
 		public String getColumnName(int column) {
 			return COL_NAMES[column];
@@ -397,7 +475,7 @@ public class BugzillaExportDialog extends JDialog {
 					int success = 0;
 					int fails = 0;
 					for (int i = 0; BugzillaExportDialog.this.isShowing() && i < _tasks.length; i++) {
-						if (((Boolean) _tasksData[i][0]).booleanValue()) {
+						if (((Boolean) _tasksData[i][INDEX_ENABLED]).booleanValue()) {
 
 							final int row = i;
 							SwingUtilities.invokeAndWait(new Runnable(){
@@ -407,11 +485,11 @@ public class BugzillaExportDialog extends JDialog {
 								}
 							});
 							
-							if(submitTask(_tasksData[i], _tasks[i])) {
+							if(submitTask(i, _tasksData[i], _tasks[i])) {
 								success++;
 								SwingUtilities.invokeAndWait(new Runnable(){
 									public void run() {
-										_tasksData[row][0] = Boolean.FALSE;
+										_tasksData[row][INDEX_ENABLED] = Boolean.FALSE;
 										((TasksModel)_tasksTable.getModel()).fireTableDataChanged();
 									}
 								});
@@ -422,6 +500,9 @@ public class BugzillaExportDialog extends JDialog {
 					}
 					if(success > 0) {
 						logMsg("Submitted " + success + " tasks");
+						
+						// bug IDs should be saved, setting project as dirty.
+						_graph.getGraphRepresentation().setDirty();
 					}
 					if(fails > 0) {
 						logMsg("Failed to submit " + fails + " tasks");
@@ -437,13 +518,15 @@ public class BugzillaExportDialog extends JDialog {
 		}.start();
 	}
 
-	private boolean submitTask(Object[] taskData, TaskImpl task) {
+	private boolean submitTask(int index, Object[] taskData, TaskImpl task) {
+		
 		BugzillaSubmitter bs = new BugzillaSubmitter();
 		Map<String, String> taskProps = new HashMap<String, String>();
-		taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[2]);
-		taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[3]);
-		taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[4]));
-		taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[5]);
+		taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[INDEX_NAME]);
+		taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[INDEX_MAN]);
+		taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[INDEX_HOURS]));
+		taskProps.put(BugzillaSubmitter.REMAINING_TIME, String.valueOf((Integer) taskData[INDEX_REMAINS]));
+		taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[INDEX_STATUS_WHITEBOARD]);
 		
 		taskProps.put(BugzillaSubmitter.PRODUCT, _productTF.getText());
 		taskProps.put(BugzillaSubmitter.VERSION, _versionTF.getText());
@@ -457,10 +540,22 @@ public class BugzillaExportDialog extends JDialog {
 		taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
 
 		try {
-			//String bugId = "pokus";
-			String bugId = bs.submit(_baseUrlTF.getText(), _userTF.getText(),
-					_passwdTF.getText(), taskProps);
-			logMsg("- Submitted bug #" + bugId + " for task '" + task.getName() + "'\n");
+			
+			String bugId = task.getBugId();
+			if(bugId != null && bugId.trim().length() > 0) {
+				// don't change remaining time
+				taskProps.remove(BugzillaSubmitter.REMAINING_TIME);
+				bs.change(_baseUrlTF.getText(), _userTF.getText(),
+						_passwdTF.getText(), bugId, taskProps);
+				logMsg("- Changed bug #" + bugId + " for task '" + task.getName() + "'\n");
+			} else {
+				bugId = bs.submit(_baseUrlTF.getText(), _userTF.getText(),
+						_passwdTF.getText(), taskProps);
+				logMsg("- Submitted bug #" + bugId + " for task '" + task.getName() + "'\n");
+				task.setBugId(bugId);
+				_tasksData[index][INDEX_BUG_ID] = bugId;
+				_tasksModel.fireTableCellUpdated(index, INDEX_BUG_ID);
+			}
 			return true;
 		} catch (Exception e) {
 			String msg;
@@ -493,8 +588,8 @@ public class BugzillaExportDialog extends JDialog {
 		_logArea.setMaximumSize(new Dimension(100,100));
 	}
 
-	public static void openDialog(JFrame owner, TaskImpl[] tasks) {
-		BugzillaExportDialog d = new BugzillaExportDialog(owner, tasks);
+	public static void openDialog(JFrame owner, TaskImpl[] tasks, TaskGraphComponent graph) {
+		BugzillaExportDialog d = new BugzillaExportDialog(owner, tasks, graph);
 		d.pack();
 		d.setLocationRelativeTo(owner);
 		d.setVisible(true);
