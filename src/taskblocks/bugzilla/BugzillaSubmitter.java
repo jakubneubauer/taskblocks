@@ -169,48 +169,66 @@ public class BugzillaSubmitter {
 	 */
 	private String submit(URL url, String body) throws IOException {
 
-		// URL must use the http protocol!
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		
-		if(body != null) {
-			conn.setRequestMethod("POST");
-			conn.setAllowUserInteraction(false); // you may not ask the user
-			conn.setDoOutput(true); // we want to send things
-			// the Content-type should be default, but we set it anyway
-			conn.setRequestProperty("Content-type",
-					"application/x-www-form-urlencoded; charset=utf-8");
-			// the content-length should not be necessary, but we're cautious
-			conn.setRequestProperty("Content-length", Integer.toString(body.length()));
+		OutputStream out = null;
+		InputStream in = null;
+		HttpURLConnection conn = null;
+		
+		try {
+			// URL must use the http protocol!
+			conn = (HttpURLConnection) url.openConnection();
+			
+			if(body != null) {
+				conn.setRequestMethod("POST");
+				conn.setAllowUserInteraction(false); // you may not ask the user
+				conn.setDoOutput(true); // we want to send things
+				// the Content-type should be default, but we set it anyway
+				conn.setRequestProperty("Content-type",
+						"application/x-www-form-urlencoded; charset=utf-8");
+				// the content-length should not be necessary, but we're cautious
+				conn.setRequestProperty("Content-length", Integer.toString(body.length()));
+		
+				// get the output stream to POST our form data
+				out = conn.getOutputStream();
+				PrintWriter pw = new PrintWriter(out);
+		
+				pw.print(body); // here we "send" our body!
+				pw.flush();
+				pw.close();
+			} else {
+				// ?
+			}
 	
-			// get the output stream to POST our form data
-			OutputStream rawOutStream = conn.getOutputStream();
-			PrintWriter pw = new PrintWriter(rawOutStream);
+			// get the input stream for reading the reply
+			// IMPORTANT! Your body will not get transmitted if you get the
+			// InputStream before completely writing out your output first!
+			in = conn.getInputStream();
 	
-			pw.print(body); // here we "send" our body!
-			pw.flush();
-			pw.close();
-		} else {
-			// ?
-		}
-
-		// get the input stream for reading the reply
-		// IMPORTANT! Your body will not get transmitted if you get the
-		// InputStream before completely writing out your output first!
-		InputStream rawInStream = conn.getInputStream();
-
-		// Get response.
-		// We hope, that bugzilla results are utf-8 encoded
-		BufferedReader rdr = new BufferedReader(new InputStreamReader(rawInStream, "UTF-8"));
-		CharArrayWriter result = new CharArrayWriter();
-		char[] buf = new char[1024];
-		int count = rdr.read(buf);
-		while(count > 0) {
-			result.write(buf, 0, count);
-			count = rdr.read(buf);
+			// Get response.
+			// We hope, that bugzilla results are utf-8 encoded
+			BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+			CharArrayWriter result = new CharArrayWriter();
+			char[] buf = new char[1024];
+			int count = rdr.read(buf);
+			while(count > 0) {
+				result.write(buf, 0, count);
+				count = rdr.read(buf);
+			}
+			
+			return result.toString();
+			
+		} finally {
+			if(out != null) {
+				out.close();
+			}
+			if(in != null) {
+				in.close();
+			}
+			if(conn != null) {
+				conn.disconnect();
+			}
 		}
 		
-		conn.disconnect();
-		return result.toString();
 	}
 
 	private void ensureDefault(Map<String, String> map, String key,

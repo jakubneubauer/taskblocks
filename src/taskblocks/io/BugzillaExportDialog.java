@@ -75,7 +75,6 @@ import taskblocks.bugzilla.BugzillaSubmitter;
 import taskblocks.graph.TaskGraphComponent;
 import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.TaskImpl;
-import taskblocks.utils.ArrayUtils;
 import taskblocks.utils.Utils;
 
 public class BugzillaExportDialog extends JDialog {
@@ -83,7 +82,7 @@ public class BugzillaExportDialog extends JDialog {
 	String[] COL_NAMES = new String[] { "", "Bug#", "Color", "Summary", "Assignee",
 			"Estimated Time", "Remaining", "Status Whiteboard" };
 
-	Class[] COL_CLASSES = new Class[] { Boolean.class, String.class, Icon.class, String.class,
+	Class<?>[] COL_CLASSES = new Class[] { Boolean.class, String.class, Icon.class, String.class,
 			String.class, String.class, String.class, String.class };
 
 	int INDEX_ENABLED = 0;
@@ -404,7 +403,7 @@ public class BugzillaExportDialog extends JDialog {
 			long endTime = (Utils.countFinishTime(task.getStartTime(), task
 					.getDuration()) -1) * Utils.MILLISECONDS_PER_DAY;
 			_tasksData[i] = new Object[COL_NAMES.length];
-			_tasksData[i][INDEX_ENABLED] = new Boolean(true);
+			_tasksData[i][INDEX_ENABLED] = Boolean.valueOf(true);
 			if(_tasks[i].getBugId() != null) {
 				_tasksData[i][INDEX_BUG_ID] = _tasks[i].getBugId();
 			}
@@ -416,9 +415,9 @@ public class BugzillaExportDialog extends JDialog {
 			}
 			_tasksData[i][INDEX_NAME] = task.getName();
 			_tasksData[i][INDEX_MAN] = task.getMan().getName();
-			_tasksData[i][INDEX_HOURS] = new Integer(
+			_tasksData[i][INDEX_HOURS] = Integer.valueOf(
 					(int) ((double) task.getDuration() * 8d * 0.8));
-			_tasksData[i][INDEX_REMAINS] = new Integer(
+			_tasksData[i][INDEX_REMAINS] = Integer.valueOf(
 					(int) ((double) (task.getDuration()-task.getActualDuration()) * 8d * 0.8));
 			if(((Integer)_tasksData[i][INDEX_REMAINS]) < 0) {
 				_tasksData[i][INDEX_REMAINS] = 0;
@@ -441,7 +440,7 @@ public class BugzillaExportDialog extends JDialog {
 			return COL_NAMES[column];
 		}
 
-		public Class getColumnClass(int col) {
+		public Class<?> getColumnClass(int col) {
 			return COL_CLASSES[col];
 		}
 
@@ -538,6 +537,11 @@ public class BugzillaExportDialog extends JDialog {
 		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
 		taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
 		taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
+		
+		// this is needed by GMC Bugzilla. Hope it will not brake other Bugzillas.
+		taskProps.put("target_milestone", "---");
+		taskProps.put("bug_file_loc", "");
+		taskProps.put("longdesclength", "1");
 
 		try {
 			
@@ -579,7 +583,9 @@ public class BugzillaExportDialog extends JDialog {
 	  try {
 			kit.read(reader, doc, doc.getLength());
 		} catch (IOException e) {
+			// NOTHING TO DO
 		} catch (BadLocationException e) {
+			// NOTHING TO DO
 		}
 		int len = doc.getLength();
 		_logArea.setSelectionStart(len);

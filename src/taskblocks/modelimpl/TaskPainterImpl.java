@@ -26,7 +26,6 @@ import java.awt.Rectangle;
 
 import taskblocks.graph.TaskGraphPainter;
 import taskblocks.utils.Colors;
-import taskblocks.utils.Utils;
 
 public class TaskPainterImpl implements TaskGraphPainter {
 
@@ -38,11 +37,9 @@ public class TaskPainterImpl implements TaskGraphPainter {
 	public void paintTask(Object task, Graphics2D g2, Rectangle bounds, boolean selected) {
 		String taskName = ((TaskImpl)task).getName();
 		
-		long actualFinish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getActualDuration());
-		long finish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getDuration());
-
-		//double percentage = (double)((TaskImpl)task).getActualDuration() / (double)((TaskImpl)task).getDuration();
-		double percentage = ((double)actualFinish - (double)((TaskImpl)task).getStartTime()) / ((double)finish - (double)((TaskImpl)task).getStartTime());
+//		long actualFinish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getActualDuration());
+//		long finish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getDuration());
+//		double percentage = ((double)actualFinish - (double)((TaskImpl)task).getStartTime()) / ((double)finish - (double)((TaskImpl)task).getStartTime());
 		
 		Color col = ((TaskImpl)task).getColor();
 		

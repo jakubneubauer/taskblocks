@@ -58,9 +58,9 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 	// how far from task left/right boundary will the mouse press will be recognized as pressing the boundary?
 	private static final int TOLERANCE = 5;
 	// constant indicating left boundary of task 
-	static Integer LEFT = new Integer(0);
+	static Integer LEFT = Integer.valueOf(0);
 	// constant indicating left boundary of task 
-	static Integer RIGHT = new Integer(1);
+	static Integer RIGHT = Integer.valueOf(1);
 	
 	/**
 	 * original mode of tasks. It is not updated when doing changes in graph. Explicit

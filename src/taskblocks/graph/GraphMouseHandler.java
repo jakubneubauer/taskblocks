@@ -105,7 +105,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		if(o instanceof Task) {
 			t = (Task)o;
 		} else if(o instanceof Pair) {
-			Pair pressedObj = (Pair)o;
+			Pair<Task, Integer> pressedObj = (Pair<Task, Integer>)o;
 			t = (Task)pressedObj.fst;
 			go = (Task)pressedObj.fst;
 		}
@@ -235,7 +235,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 					if(o instanceof Task) {
 						_destTask = (Task)o;
 					} else if(o instanceof Pair) {
-						_destTask = (Task)((Pair)o).fst;
+						_destTask = ((Pair<Task, Integer>)o).fst;
 					} else {
 						_destTask = null;
 					}
@@ -278,7 +278,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 			if(o instanceof Task) {
 				t = (Task)o;
 			} else {
-				t = (Task)((Pair)o).fst;
+				t = ((Pair<Task, Integer>)o).fst;
 			}
 			String taskName = _graph._model.getTaskName(t._userObject);
 			DateFormat df = new SimpleDateFormat("d.M.");
@@ -302,13 +302,13 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 
 		if(e.getButton() == MouseEvent.BUTTON1 && o instanceof Pair) {
 			// presed on task left/right boundary
-			Pair pressedObj = (Pair)o;
-			Task t = (Task)pressedObj.fst;
-			Integer direction = (Integer)pressedObj.snd;
+			Pair<Task,Integer> pressedObj = (Pair<Task,Integer>)o;
+			Task t = pressedObj.fst;
+			Integer direction = pressedObj.snd;
 			_pressedTask = t;
-			if(TaskGraphComponent.LEFT == direction) {
+			if(TaskGraphComponent.LEFT.equals(direction)) {
 				_dragMode = 2;
-			} else if(TaskGraphComponent.RIGHT == direction) {
+			} else if(TaskGraphComponent.RIGHT.equals(direction)) {
 				_dragMode = 3;
 			}
 			return;

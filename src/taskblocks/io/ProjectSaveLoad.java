@@ -21,7 +21,10 @@ package taskblocks.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +68,7 @@ public class ProjectSaveLoad {
 	public static final String PREDECESSORS_E = "predecessors";
 	public static final String PREDECESSOR_E = "predecessor";
 	
+	public static final String VERSION_A = "version";
 	public static final String NAME_A = "name";
 	public static final String ID_A = "id";
 	public static final String START_A = "start";
@@ -77,9 +81,11 @@ public class ProjectSaveLoad {
 	// Id in Bugzilla, used when exporting to it.
 	public static final String BUGID_A = "bugid";
 	
-	TaskModelImpl _model;
-	Map<String, TaskImpl> _taskIds;
-	Map<String, ManImpl> _manIds;
+	TaskModelImpl _model; // NOPMD by jakub on 6.8.09 15:50
+	Map<String, TaskImpl> _taskIds; // NOPMD by jakub on 6.8.09 15:50
+	Map<String, ManImpl> _manIds; // NOPMD by jakub on 6.8.09 15:50
+	
+	public static final int CURRENT_VERSION = 1;
 
 	/**
 	 * Loads project data model from given file.
@@ -105,6 +111,20 @@ public class ProjectSaveLoad {
 			Map<String, TaskImpl>tasks = new HashMap<String, TaskImpl>();
 			// mapping tasks -> list of their predecessors IDs
 			List<Pair<TaskImpl, String[]>> taskPredecessorsIds = new ArrayList<Pair<TaskImpl,String[]>>();
+
+			// check the data version. The first Taskblocks files had no version attribute.
+			String versionAttr = rootE.getAttribute(VERSION_A);
+			if(versionAttr != null && versionAttr.trim().length() > 0) {
+				try {
+					versionAttr = versionAttr.trim();
+					int version = Integer.parseInt(versionAttr);
+					if(version > CURRENT_VERSION) {
+						throw new WrongDataException("Cannot load higher version '" + version + "', current is '" + CURRENT_VERSION + "'.");
+					}
+				} catch(NumberFormatException e) {
+					throw new WrongDataException("Wrong data file version: '" + versionAttr + "'");
+				}
+			}
 			
 			// 1. load all tasks and mans alone, 2. bind them between each other
 			Element mansE = getFirstChild(rootE, MANS_E);
@@ -123,13 +143,13 @@ public class ProjectSaveLoad {
 				for(Element taskE: Utils.getChilds(tasksE, TASK_E)) {
 					String taskId = taskE.getAttribute(ID_A);
 					String taskName = taskE.getAttribute(NAME_A);
-					long taskStart = Long.valueOf(taskE.getAttribute(START_A));
-					long taskDuration = Long.valueOf(taskE.getAttribute(DURATION_A));
+					long taskStart = xmlTimeToTaskTime(taskE.getAttribute(START_A));
+					long taskDuration = xmlDurationToTaskDuration(taskE.getAttribute(DURATION_A));
 					
 					String usedStr = taskE.getAttribute(ACTUAL_A);
 					long taskUsed = 0;
 					if(usedStr != null && usedStr.trim().length() > 0) {
-						taskUsed = Long.valueOf(taskE.getAttribute(ACTUAL_A));
+						taskUsed = xmlDurationToTaskDuration(taskE.getAttribute(ACTUAL_A));
 					}
 					String bugId = taskE.getAttribute(BUGID_A);
 					String colorTxt = taskE.getAttribute(COLOR_A);
@@ -180,9 +200,9 @@ public class ProjectSaveLoad {
 				for(String predId: taskAndPredIds.snd) {
 					TaskImpl pred = tasks.get(predId);
 					if(pred == null) {
-						System.out.println("Warning: Task predecessor with id " + predId + " doesn't exist");
+						System.out.println("Warning: Task predecessor with id " + predId + " doesn't exist"); // NOPMD by jakub on 6.8.09 15:50
 					} else if(pred == taskAndPredIds.fst) {
-						System.out.println("Warning: Task with id " + predId + " is it's own predecessor");
+						System.out.println("Warning: Task with id " + predId + " is it's own predecessor"); // NOPMD by jakub on 6.8.09 15:50
 					} else {
 						preds.add(pred);
 					}
@@ -261,6 +281,7 @@ public class ProjectSaveLoad {
 		for(TaskImpl t: _model._tasks) {
 			saveTask(tasksE, t);
 		}
+		rootE.setAttribute(VERSION_A, String.valueOf(CURRENT_VERSION));
 		rootE.appendChild(tasksE);
 	}
 
@@ -270,21 +291,66 @@ public class ProjectSaveLoad {
 		manE.setAttribute(NAME_A, man.getName());
 		mansE.appendChild(manE);
 	}
+	
+	static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	
+	private static String taskTimeToXmlTime(long day) {
+		return df.format(new Date(day * Utils.MILLISECONDS_PER_DAY + 8*60*60*1000));
+	}
+	
+	private static String taskDurationToXmlDuration(long dur) {
+		return "P" + dur + "D";
+	}
+	
+	private static long xmlTimeToTaskTime(String time) throws WrongDataException {
+		try {
+			return Long.parseLong(time);
+		} catch(NumberFormatException e) {
+			// do nothing
+		}
+		try {
+			return df.parse(time).getTime()/Utils.MILLISECONDS_PER_DAY;
+		} catch (ParseException e) {
+			// DO NOTHING
+		}
+		throw new WrongDataException("Wrong time value: " + time);
+	}
+	
+	private static long xmlDurationToTaskDuration(String dur) throws WrongDataException{
+		if(dur == null || dur.trim().length() == 0) {
+			return 0;
+		}
+		try {
+			return Long.parseLong(dur);
+		} catch(NumberFormatException e) {
+			// do nothing
+		}
+		if(dur.startsWith("P") && dur.endsWith("D")) {
+			try {
+				return Long.parseLong(dur.substring(1,dur.length()-1));
+			} catch(NumberFormatException e) {
+				// do nothing
+			}
+		}
+		throw new WrongDataException("Wrong duration value: " + dur);
+	}
 
 	private void saveTask(Element tasksE, TaskImpl t) {
 		Element taskE = tasksE.getOwnerDocument().createElement(TASK_E);
 		taskE.setAttribute(NAME_A, t.getName());
 		taskE.setAttribute(ID_A, t._id);
-		taskE.setAttribute(START_A, String.valueOf(t.getStartTime()));
-		taskE.setAttribute(DURATION_A, String.valueOf(t.getDuration()));
-		taskE.setAttribute(ACTUAL_A, String.valueOf(t.getActualDuration()));
+		taskE.setAttribute(START_A, taskTimeToXmlTime(t.getStartTime()));
+		taskE.setAttribute(DURATION_A, taskDurationToXmlDuration(t.getDuration()));
+		if(t.getActualDuration() != 0) {
+			taskE.setAttribute(ACTUAL_A, taskDurationToXmlDuration(t.getActualDuration()));
+		}
 		taskE.setAttribute(MAN_A, t.getMan()._id);
 		taskE.setAttribute(COMM_A, t.getComment());
 		if(t.getColorLabel() != null) {
 			taskE.setAttribute(COLOR_A, String.valueOf(t.getColorLabel()._index));
 		}
-		if(t.getBugId() != null && t.getBugId().length() > 0) {
-			taskE.setAttribute(BUGID_A, t.getBugId());
+		if(t.getBugId() != null && t.getBugId().trim().length() > 0) {
+			taskE.setAttribute(BUGID_A, t.getBugId().trim());
 		}
 		
 		// save predecessors
@@ -343,14 +409,12 @@ public class ProjectSaveLoad {
 			// indent before end-tag. It means just as last child
 			e.appendChild(e.getOwnerDocument().createTextNode(currentIndent));
 
-			// recursively indent children
-			currentIndent += "  ";
 			// we must get the nodelist again, because previous adding of childs broked
 			// the old nodelist.
 			Node n = e.getFirstChild();
 			while(n != null) {
 				if(n.getNodeType() == Node.ELEMENT_NODE) {
-					prettyLayoutRec((Element)n, currentIndent);
+					prettyLayoutRec((Element)n, currentIndent + "  ");
 				}
 				n = n.getNextSibling();
 			}

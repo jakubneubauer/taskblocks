@@ -68,7 +68,7 @@ public class TaskConfigPanel extends JPanel {
 		manCB = new JComboBox(new DefaultComboBoxModel(_model._mans));
 		JLabel durationL = new JLabel("Planed Duration:");
 		planedSP = new JSpinner(new SpinnerNumberModel((int)_task.getDuration(), 1, 365, 1));
-		JLabel actualDurL = new JLabel("Actual Duration:");
+		//JLabel actualDurL = new JLabel("Actual Duration:");
 		actualSP = new JSpinner(new SpinnerNumberModel((int)_task.getActualDuration(), 0, 365, 1));
 		JLabel colorL = new JLabel("Color Label:");
 		colorLabelCB = new JComboBox(new DefaultComboBoxModel(ColorLabel.COLOR_LABELS));

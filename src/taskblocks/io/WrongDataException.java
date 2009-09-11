@@ -27,11 +27,11 @@ package taskblocks.io;
  */
 public class WrongDataException extends Exception {
 	
-	public WrongDataException(String msg) {
+	public WrongDataException(final String msg) {
 		super(msg);
 	}
 
-	public WrongDataException(String msg, Throwable t) {
-		super(msg, t);
+	public WrongDataException(final String msg, final Throwable thr) {
+		super(msg, thr);
 	}
 }

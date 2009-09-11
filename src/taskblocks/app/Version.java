@@ -20,6 +20,7 @@
 package taskblocks.app;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -30,13 +31,23 @@ public class Version {
 	
 	static {
 		String ver ="unknown";
+		InputStream versionResourceStream = null;
 		try {
-			InputStream versionResourceStream = ClassLoader.getSystemResourceAsStream("taskblocks/version");
+			versionResourceStream = ClassLoader.getSystemResourceAsStream("taskblocks/version");
 			if(versionResourceStream != null) {
 				BufferedReader r = new BufferedReader(new InputStreamReader(versionResourceStream));
 				ver=r.readLine();
 			}
 		} catch (Exception e) {
+			// DO NOTHING
+		} finally {
+			if(versionResourceStream != null) {
+				try {
+					versionResourceStream.close();
+				} catch (IOException e) {
+					// DO NOTHING
+				}
+			}
 		}
 		VERSION=ver;
 	}
