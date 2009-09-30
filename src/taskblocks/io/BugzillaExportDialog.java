@@ -547,8 +547,9 @@ public class BugzillaExportDialog extends JDialog {
 			
 			String bugId = task.getBugId();
 			if(bugId != null && bugId.trim().length() > 0) {
-				// don't change remaining time
+				// don't change remaining time and 'BLOCKS'
 				taskProps.remove(BugzillaSubmitter.REMAINING_TIME);
+				taskProps.remove(BugzillaSubmitter.BLOCKS);
 				bs.change(_baseUrlTF.getText(), _userTF.getText(),
 						_passwdTF.getText(), bugId, taskProps);
 				logMsg("- Changed bug #" + bugId + " for task '" + task.getName() + "'\n");
