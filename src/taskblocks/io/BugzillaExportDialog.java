@@ -521,22 +521,27 @@ public class BugzillaExportDialog extends JDialog {
 		
 		BugzillaSubmitter bs = new BugzillaSubmitter();
 		Map<String, String> taskProps = new HashMap<String, String>();
-		taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[INDEX_NAME]);
-		taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[INDEX_MAN]);
-		taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[INDEX_HOURS]));
-		taskProps.put(BugzillaSubmitter.REMAINING_TIME, String.valueOf((Integer) taskData[INDEX_REMAINS]));
-		taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[INDEX_STATUS_WHITEBOARD]);
 		
-		taskProps.put(BugzillaSubmitter.PRODUCT, _productTF.getText());
-		taskProps.put(BugzillaSubmitter.VERSION, _versionTF.getText());
-		taskProps.put(BugzillaSubmitter.COMPONENT, _componentTF.getText());
-		taskProps.put(BugzillaSubmitter.BLOCKS, _blocksTF.getText());
+		String bugId = task.getBugId();
+		if(bugId == null || bugId.trim().length() == 0) {
+			// new task
+			taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[INDEX_HOURS]));
+			taskProps.put(BugzillaSubmitter.REMAINING_TIME, String.valueOf((Integer) taskData[INDEX_REMAINS]));
+			taskProps.put(BugzillaSubmitter.BLOCKS, _blocksTF.getText());
+			taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
+			taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
+		}
+		
+		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
+		taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
 		taskProps.put(BugzillaSubmitter.HARDWARE, _hardwareTF.getText());
 		taskProps.put(BugzillaSubmitter.OS, _osTF.getText());
-		taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
-		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
-		taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
-		taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
+		taskProps.put(BugzillaSubmitter.VERSION, _versionTF.getText());
+		taskProps.put(BugzillaSubmitter.COMPONENT, _componentTF.getText());
+		taskProps.put(BugzillaSubmitter.PRODUCT, _productTF.getText());
+		taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[INDEX_NAME]);
+		taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[INDEX_MAN]);
+		taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[INDEX_STATUS_WHITEBOARD]);
 		
 		// this is needed by GMC Bugzilla. Hope it will not brake other Bugzillas.
 		taskProps.put("target_milestone", "---");
@@ -545,11 +550,8 @@ public class BugzillaExportDialog extends JDialog {
 
 		try {
 			
-			String bugId = task.getBugId();
 			if(bugId != null && bugId.trim().length() > 0) {
-				// don't change remaining time and 'BLOCKS'
-				taskProps.remove(BugzillaSubmitter.REMAINING_TIME);
-				taskProps.remove(BugzillaSubmitter.BLOCKS);
+				// don't change time and 'BLOCKS'
 				bs.change(_baseUrlTF.getText(), _userTF.getText(),
 						_passwdTF.getText(), bugId, taskProps);
 				logMsg("- Changed bug #" + bugId + " for task '" + task.getName() + "'\n");
