@@ -107,6 +107,9 @@ public class BugzillaSubmitter {
 
 	/** Bug property name */
 	public static final String BLOCKS = "blocked";
+	
+	/** Bug property name */
+	public static final String DEPENDSON = "dependson";
 
 	/** Must be enabled on bugzilla server */
 	public static final String STATUS_WHITEBOARD = "status_whiteboard";
@@ -392,6 +395,8 @@ public class BugzillaSubmitter {
 		bugData.put(ESTIMATED_TIME, Utils.getFirstElemText(bugE, ESTIMATED_TIME));
 		bugData.put(ACTUAL_TIME, Utils.getFirstElemText(bugE, ACTUAL_TIME));
 		bugData.put(REMAINING_TIME, Utils.getFirstElemText(bugE, REMAINING_TIME));
+		bugData.put(DEPENDSON, Utils.getElemTexts(bugE, DEPENDSON));
+		bugData.put(BLOCKS, Utils.getElemTexts(bugE, BLOCKS));
 		return id;
 		
 	}

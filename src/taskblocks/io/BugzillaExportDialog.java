@@ -523,48 +523,68 @@ public class BugzillaExportDialog extends JDialog {
 		Map<String, String> taskProps = new HashMap<String, String>();
 		
 		String bugId = task.getBugId();
-		if(bugId == null || bugId.trim().length() == 0) {
-			// new task
-			taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[INDEX_HOURS]));
-			taskProps.put(BugzillaSubmitter.REMAINING_TIME, String.valueOf((Integer) taskData[INDEX_REMAINS]));
-			taskProps.put(BugzillaSubmitter.BLOCKS, _blocksTF.getText());
-			taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
-			taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
-		}
-		
-		taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
-		taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
-		taskProps.put(BugzillaSubmitter.HARDWARE, _hardwareTF.getText());
-		taskProps.put(BugzillaSubmitter.OS, _osTF.getText());
-		taskProps.put(BugzillaSubmitter.VERSION, _versionTF.getText());
-		taskProps.put(BugzillaSubmitter.COMPONENT, _componentTF.getText());
-		taskProps.put(BugzillaSubmitter.PRODUCT, _productTF.getText());
-		taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[INDEX_NAME]);
-		taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[INDEX_MAN]);
-		taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[INDEX_STATUS_WHITEBOARD]);
-		
-		// this is needed by GMC Bugzilla. Hope it will not brake other Bugzillas.
-		taskProps.put("target_milestone", "---");
-		taskProps.put("bug_file_loc", "");
-		taskProps.put("longdesclength", "1");
-
 		try {
+			if(bugId == null || bugId.trim().length() == 0) {
+				// new task
+				taskProps.put(BugzillaSubmitter.ESTIMATED_TIME, String.valueOf((Integer) taskData[INDEX_HOURS]));
+				taskProps.put(BugzillaSubmitter.REMAINING_TIME, String.valueOf((Integer) taskData[INDEX_REMAINS]));
+				taskProps.put(BugzillaSubmitter.BLOCKS, _blocksTF.getText());
+				taskProps.put(BugzillaSubmitter.DESCRIPTION, ""); // required by bugzilla v. 2.2, (3.0 doesn't)
+				taskProps.put(BugzillaSubmitter.KEYWORDS, _keywordsTF.getText());
+			} else {
+				
+				// copy BLOCKS and DEPENDS ON from the actual state in bugzilla.
+				
+				bugId = bugId.trim();
+				Map<String, Map<String, String>> result = bs.query(_baseUrlTF.getText(), _userTF.getText(), _passwdTF.getText(), new String[] {bugId});
+				Map<String, String> bugFields = result.get(bugId);
+				
+				String dependson = bugFields.get(BugzillaSubmitter.DEPENDSON);
+				if(dependson != null) {
+					taskProps.put(BugzillaSubmitter.DEPENDSON, dependson);
+				}
+				
+				String blocks = bugFields.get(BugzillaSubmitter.BLOCKS);
+				if(blocks != null) {
+					taskProps.put(BugzillaSubmitter.BLOCKS, blocks);
+				}
+			}
+			
+			taskProps.put(BugzillaSubmitter.SEVERITY, _severTF.getText());
+			taskProps.put(BugzillaSubmitter.PRIORITY, _priorTF.getText());
+			taskProps.put(BugzillaSubmitter.HARDWARE, _hardwareTF.getText());
+			taskProps.put(BugzillaSubmitter.OS, _osTF.getText());
+			taskProps.put(BugzillaSubmitter.VERSION, _versionTF.getText());
+			taskProps.put(BugzillaSubmitter.COMPONENT, _componentTF.getText());
+			taskProps.put(BugzillaSubmitter.PRODUCT, _productTF.getText());
+			taskProps.put(BugzillaSubmitter.SUMMARY, (String) taskData[INDEX_NAME]);
+			taskProps.put(BugzillaSubmitter.ASSIGNED_TO, (String) taskData[INDEX_MAN]);
+			taskProps.put(BugzillaSubmitter.STATUS_WHITEBOARD, (String) taskData[INDEX_STATUS_WHITEBOARD]);
+			
+			// this is needed by GMC Bugzilla. Hope it will not brake other Bugzillas.
+			taskProps.put("target_milestone", "---");
+			taskProps.put("bug_file_loc", "");
+			taskProps.put("longdesclength", "1");
 			
 			if(bugId != null && bugId.trim().length() > 0) {
-				// don't change time and 'BLOCKS'
+				logMsg("-  Changing bug #" + bugId + " for task '" + task.getName() + "'\n");
+				logMsg("   Submitting " + taskProps);
 				bs.change(_baseUrlTF.getText(), _userTF.getText(),
 						_passwdTF.getText(), bugId, taskProps);
-				logMsg("- Changed bug #" + bugId + " for task '" + task.getName() + "'\n");
+				logMsg("   OK");
 			} else {
+				logMsg("-  Creating bug #" + bugId + " for task '" + task.getName() + "'\n");
+				logMsg("   Submitting " + taskProps);
 				bugId = bs.submit(_baseUrlTF.getText(), _userTF.getText(),
 						_passwdTF.getText(), taskProps);
-				logMsg("- Submitted bug #" + bugId + " for task '" + task.getName() + "'\n");
 				task.setBugId(bugId);
 				_tasksData[index][INDEX_BUG_ID] = bugId;
 				_tasksModel.fireTableCellUpdated(index, INDEX_BUG_ID);
+				logMsg("   OK");
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			String msg;
 			if(e instanceof IOException || e.getMessage() == null) {
 				msg = e.toString();

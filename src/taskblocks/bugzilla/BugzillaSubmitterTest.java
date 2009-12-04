@@ -75,7 +75,11 @@ public class BugzillaSubmitterTest extends TestCase {
 	
 	public void testQuery() {
 		try {
-			Map<String, Map<String, String>> result = new BugzillaSubmitter().query("http://wi", "j.neubauer@gmc.net", "abba", new String[] {"31396", "31397"});
+			String id = "31601";
+			Map<String, Map<String, String>> result = new BugzillaSubmitter().query("http://wi", "j.neubauer@gmc.net", "abba", new String[] {id});
+			Map<String, String> bugFields = result.get(id);
+			System.out.println("dependson: " + bugFields.get(BugzillaSubmitter.DEPENDSON));
+			System.out.println("blocks: " + bugFields.get(BugzillaSubmitter.BLOCKS));
 			
 			System.out.println(result.toString());
 		} catch (MalformedURLException e) {

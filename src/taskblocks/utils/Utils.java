@@ -117,4 +117,22 @@ public class Utils {
 		}
 		return childs[0].getTextContent();
 	}
+
+	public static String getElemTexts(Element parent, String childName) {
+		StringBuilder result = new StringBuilder();
+		Element[] childs = getChilds(parent, childName);
+		if(childs.length == 0) {
+			return null;
+		}
+		int i = 0;
+		for(Element child: childs) {
+			if(i > 0) {
+				result.append(",");
+			}
+			result.append(child.getTextContent());
+			i++;
+		}
+		return result.toString();
+	}
+
 }
