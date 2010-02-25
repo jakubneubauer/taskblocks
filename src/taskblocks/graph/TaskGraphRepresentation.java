@@ -27,6 +27,7 @@ import java.util.List;
 import javax.swing.event.ChangeListener;
 
 import taskblocks.utils.ArrayUtils;
+import taskblocks.utils.Utils;
 
 /**
  * helper class used to build the data structure from task graph model.
@@ -281,18 +282,31 @@ public class TaskGraphRepresentation {
 	public synchronized void shrinkTasks() {
 		TaskStartTimeComarator taskStartTimeComparator = new TaskStartTimeComarator();
 		// find the lowest time
+		long now = System.currentTimeMillis()/Utils.MILLISECONDS_PER_DAY;
 		long firstTime = Long.MAX_VALUE;
 		for(Task t: _tasks) {
 			firstTime = Math.min(t.getStartTime(), firstTime);
 		}
+		// repair the lowest time, to be not before "now"
+		firstTime = Math.max(now, firstTime);
+		
 		for(TaskRow row: _rows) {
 			if(row._tasks.length > 0) {
 				// first, we must sort them according to their starting time, so they will appear
 				// in the same order as before.
 				Arrays.sort(row._tasks, taskStartTimeComparator);
-				row._tasks[0].setStartTime(firstTime);
+				
+				// FIXED ISSUE #10 Shrink only tasks that are not yet started (ignore those before "now")
+				boolean someWasAlreadyShrinked = false;
+				//row._tasks[0].setStartTime(firstTime);
 				for(int i = 1; i < row._tasks.length; i++) {
-					row._tasks[i].setStartTime(row._tasks[i-1].getFinishTime());
+					if(someWasAlreadyShrinked) {
+						row._tasks[i].setStartTime(row._tasks[i-1].getFinishTime());
+					} else {
+						if(_tasks[i].getStartTime() > firstTime) {
+							row._tasks[i].setStartTime(firstTime);
+						}
+					}
 				}
 			}
 		}
