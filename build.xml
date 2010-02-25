@@ -4,17 +4,20 @@
      Task Blocks Build File
 -->
 
-  <project name="Task Blocks" default="jar">
+<project name="Task Blocks" default="jar">
+  <description>Build file for Task Blocks application</description>
   
-  <property name="appVersion" value="0.6-preview"/>
+  <property name="appVersion" value="0.6"/>
   <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
 	
+
   <property name="appJar" value="taskblocks.jar"/>
+  <property name="appJarVersioned" value="taskblocks-${appVersion}.jar"/>
   <property name="macAppDir" value="distr/MacOS/taskblocks-${appVersion}"/>
   <property name ="tarDir" value="taskblocks-${appVersion}"/>
 
-  <description>Build file for Task Blocks application</description>
 
+<!-- obsolete
   <target name="archive" depends="clean">
   	<copy todir="${tarDir}">
   		<fileset dir=".">
@@ -41,9 +44,12 @@
   	<replace file="web/taskblocks.jnlp" token="APPVERSION" value="${appVersion}"/>
   	<replace file="web/taskblocks.jnlp" token="CODEBASE" value="${webCodeBase}"/>
   </target>
-
+-->
+  	
   <target name="distr" depends="jar" description="Makes the distribution">
     <mkdir dir="distr"/>
+  	
+  	<!-- Create Mac OS X .dmg -->
     <mkdir dir="${macAppDir}"/>
   	<copy todir="${macAppDir}">
   		<fileset dir="lib/apptemplate">
@@ -53,7 +59,6 @@
   	<replace file="${macAppDir}/TaskBlocks.app/Contents/Info.plist" token="APPVERSION" value="${appVersion}"/>
   	<chmod perm="a+x" file="${macAppDir}/TaskBlocks.app/Contents/MacOS/TaskBlocks"></chmod>
     <copy file="${appJar}" todir="${macAppDir}/TaskBlocks.app/Contents/Resources/Java"/>
-    <copy file="${appJar}" todir="distr/other"/>
   	<delete file="${macAppDir}.dmg"/>
   	<exec executable="hdiutil">
   	  <arg value="create"/>
@@ -61,6 +66,9 @@
   	  <arg value="${macAppDir}"/>
   	  <arg value="${macAppDir}.dmg"/>
   	</exec>
+
+  	<!-- Create versioned .jar file for other platforms -->
+    <copy file="${appJar}" tofile="distr/other/${appJarVersioned}"/>
   </target>
 
   <target name="jar" depends="compile" description="creates the application jar">
@@ -88,6 +96,7 @@
     <delete dir="bin"/>
     <delete dir="distr"/>
     <delete file="${appJar}"/>
+  	<!--
   	<delete dir="web/builds"/>
   	<delete file="web/taskblocks.jnlp"/>
   	<delete dir="${tarDir}"/>
@@ -95,6 +104,7 @@
     <exec executable="make" dir="web">
       <arg value="clean"/>
     </exec>
+    -->
   </target>
 
 </project>
