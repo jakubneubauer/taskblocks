@@ -52,6 +52,7 @@ class Task extends GraphObject {
 	
 	/** Finish time (counted mathematically. So, for example 1 day task finishes at start-time + 1) . Is automatically counted from startTime and duration */
 	private long _finishTime;
+	
 	/** Finish time (counted for human. So, for example 1 day task finishes at the same day as it starts) */
 	private long _finishTimeForTooltip;
 	
@@ -82,14 +83,24 @@ class Task extends GraphObject {
 		_startTime = Utils.repairStartTime(_startTime);
 	}
 
+	/** Returns the netto duration of a task */
 	public long getDuration() {
 		return _duration;
 	}
 	
+	/**
+	 * Gets actual duration, which means how much was already done
+	 */
 	public long getActualDuration() {
 		return _actualDuration;
 	}
 
+	/**
+	 * Sets task duration.
+	 * 
+	 * @param duration The tasks duration
+	 * @param actual How much was already done.
+	 */
 	public void setDuration(long duration, long actual) {
 		long oldDuration = _duration;
 		this._duration = duration;
@@ -134,6 +145,7 @@ class Task extends GraphObject {
 		}
 	}
 
+	// TODO: multiple with workers duration/effort ratio?
 	public long getRealDuration() {
 		return _finishTime - _startTime;
 	}

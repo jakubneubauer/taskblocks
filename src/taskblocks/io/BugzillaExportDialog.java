@@ -65,6 +65,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
@@ -95,7 +97,7 @@ public class BugzillaExportDialog extends JDialog {
 	int INDEX_STATUS_WHITEBOARD = 7;
 
 	TaskImpl[] _tasks;
-	TaskGraphComponent _graph;
+	ChangeListener _changeListener;
 
 	JTable _tasksTable;
 
@@ -138,7 +140,13 @@ public class BugzillaExportDialog extends JDialog {
 	
 	Preferences _prefs = Preferences.userNodeForPackage(this.getClass());
 
-	private BugzillaExportDialog(JFrame owner, TaskImpl[] tasks, TaskGraphComponent graph) {
+	/**
+	 * 
+	 * @param owner
+	 * @param tasks
+	 * @param changeListener Will be notified when some task changes (to set it as "dirty")
+	 */
+	private BugzillaExportDialog(JFrame owner, TaskImpl[] tasks, ChangeListener changeListener) {
 		super(owner, "Bugzilla export", true);
 
 		_tasks = new TaskImpl[tasks.length];
@@ -151,7 +159,7 @@ public class BugzillaExportDialog extends JDialog {
 				}
 				return o1.getName().compareTo(o2.getName());
 			}});
-		_graph = graph;
+		_changeListener = changeListener;
 		constructData();
 		createActions();
 
@@ -500,7 +508,7 @@ public class BugzillaExportDialog extends JDialog {
 						logMsg("Submitted " + success + " tasks");
 						
 						// bug IDs should be saved, setting project as dirty.
-						_graph.getGraphRepresentation().setDirty();
+						_changeListener.stateChanged(new ChangeEvent(this));
 					}
 					if(fails > 0) {
 						logMsg("Failed to submit " + fails + " tasks");
@@ -616,8 +624,8 @@ public class BugzillaExportDialog extends JDialog {
 		_logArea.setMaximumSize(new Dimension(100,100));
 	}
 
-	public static void openDialog(JFrame owner, TaskImpl[] tasks, TaskGraphComponent graph) {
-		BugzillaExportDialog d = new BugzillaExportDialog(owner, tasks, graph);
+	public static void openDialog(JFrame owner, TaskImpl[] tasks, ChangeListener changeListener) {
+		BugzillaExportDialog d = new BugzillaExportDialog(owner, tasks, changeListener);
 		d.pack();
 		d.setLocationRelativeTo(owner);
 		d.setVisible(true);

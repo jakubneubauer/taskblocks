@@ -19,6 +19,12 @@
 
 package taskblocks.graph;
 
+/**
+ * This is the interface that needs to be implemented to provide data about tasks.
+ * 
+ * @author jakub
+ *
+ */
 public interface TaskModel {
 	/** Returns all tasks */
 	Object[] getTasks();

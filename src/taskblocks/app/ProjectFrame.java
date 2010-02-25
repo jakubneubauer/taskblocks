@@ -210,7 +210,11 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 
 	Action _bugzillaSubmit = new MyAction("Export to Bugzilla...", TaskBlocks.getImage("bugzilla.png"), "Opens the Bugzilla Export dialog"){
 		public void actionPerformed(ActionEvent e) {
-			BugzillaExportDialog.openDialog(ProjectFrame.this, _taskModel._tasks, _graph);
+			BugzillaExportDialog.openDialog(ProjectFrame.this, _taskModel._tasks, new ChangeListener() {
+				public void stateChanged(ChangeEvent arg0) {
+					_graph.getGraphRepresentation().setDirty();
+				}
+			});
 			
 		}};
 		
