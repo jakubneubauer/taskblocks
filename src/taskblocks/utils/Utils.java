@@ -65,6 +65,11 @@ public class Utils {
 		return (int)((time + FIRST_SATURDAY + 2) % 7);
 	}
 	
+	/**
+	 * Repairs starting time of task - saturday and sunday are changed to monday.
+	 * @param startTime
+	 * @return
+	 */
 	public static long repairStartTime(long startTime) {
 		long startDayInWeek = Utils.getDayInWeek(startTime);
 		if(startDayInWeek == 5) {

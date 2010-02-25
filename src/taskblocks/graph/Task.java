@@ -145,7 +145,9 @@ class Task extends GraphObject {
 		}
 	}
 
-	// TODO: multiple with workers duration/effort ratio?
+	/**
+	 * real duration of the task, including non-working days.
+	 */
 	public long getRealDuration() {
 		return _finishTime - _startTime;
 	}
