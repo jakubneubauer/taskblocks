@@ -144,7 +144,6 @@ public class BugzillaExportDialog extends JDialog {
 		_tasks = new TaskImpl[tasks.length];
 		System.arraycopy(tasks, 0, _tasks, 0, tasks.length);
 		Arrays.sort(_tasks, new Comparator<TaskImpl>(){
-			@Override
 			public int compare(TaskImpl o1, TaskImpl o2) {
 				int res = o1.getMan().getName().compareTo(o2.getMan().getName());
 				if(res != 0) {
