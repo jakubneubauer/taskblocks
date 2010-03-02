@@ -408,7 +408,7 @@ public class BugzillaExportDialog extends JDialog {
 			// not the day after (mathematically)
 			
 			long endTime = (Utils.countFinishTime(task.getStartTime(), task
-					.getDuration()) -1) * Utils.MILLISECONDS_PER_DAY;
+					.getDuration(), task.getWorkload()) -1) * Utils.MILLISECONDS_PER_DAY;
 			_tasksData[i] = new Object[COL_NAMES.length];
 			_tasksData[i][INDEX_ENABLED] = Boolean.valueOf(true);
 			if(_tasks[i].getBugId() != null) {

@@ -35,6 +35,7 @@ public class TaskPainterImpl implements TaskGraphPainter {
 	Color _taskBorderSelCol = Colors.SELECTOIN_COLOR;
 	
 	public void paintTask(Object task, Graphics2D g2, Rectangle bounds, boolean selected) {
+		
 		String taskName = ((TaskImpl)task).getName();
 		
 //		long actualFinish = Utils.countFinishTime(((TaskImpl)task).getStartTime(), ((TaskImpl)task).getActualDuration());

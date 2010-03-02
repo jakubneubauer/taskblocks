@@ -80,6 +80,7 @@ public class ManConfigDialog extends ConfigDialogStub  {
 		_graph.getGraphRepresentation().updateModel();
 		ManImpl man = new ManImpl();
 		man.setName(_cfgPanel.nameTF.getText());
+		man.setWorkload(((Number)_cfgPanel._workloadSpin.getValue()).doubleValue()/100.0);
 		_model.addMan(man);
 		
 		_graph.setModel(_model);

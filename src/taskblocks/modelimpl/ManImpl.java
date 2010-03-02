@@ -22,6 +22,7 @@ package taskblocks.modelimpl;
 public class ManImpl {
 	
 	private String _name;
+	private double _workload = 1.0; // by default, the worker will work full time on its jobs
 	
 	/** Used only when saving */
 	public String _id;
@@ -36,5 +37,13 @@ public class ManImpl {
 	
 	public String toString() {
 		return _name;
+	}
+	
+	public double getWorkload() {
+		return _workload;
+	}
+	
+	public void setWorkload(double workload) {
+		_workload = workload;
 	}
 }

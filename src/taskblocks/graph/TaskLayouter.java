@@ -75,9 +75,8 @@ class TaskLayouter {
 					// if yes, increase connPadding until nothings crosses.
 					// Note, that we must check only already processed
 					// connections.
-					boolean run = true;
-					while (run) {
-						run = false;
+					LOOP:
+					while (true) {
 						for (Connection c2 : processedConnections) {
 							boolean c2GoingDown = row._index <= c2._toTask
 									.getRow()._index;
@@ -85,10 +84,12 @@ class TaskLayouter {
 									&& connPadding == c2._padding
 									&& crosses(c, c2)) {
 								connPadding++;
-								run = true;
-								break; // breaks for loop and repeates again.
+								// padding increased, lets check again.
+								continue LOOP;
 							}
 						}
+						// all checks OK => stop
+						break LOOP;
 					}
 					c._padding = connPadding;
 					processedConnections.add(c);
@@ -106,16 +107,25 @@ class TaskLayouter {
 			row._topPadding = maxUpPadding;
 			row._bottomPadding = maxDownPadding+1;
 
+			double top = rowTop + TaskGraphComponent.CONN_PADDING_FACTOR;
+			double height = _rowHeight
+			- TaskGraphComponent.CONN_PADDING_FACTOR;
 			for (Task t : row._tasks) {
-
 				double left = _graph.timeToX(t.getStartTime());
 				double widthPlaned = t.getRealDuration() * _graph._dayWidth;
-				double top = rowTop + TaskGraphComponent.CONN_PADDING_FACTOR;
-				double height = _rowHeight
-						- TaskGraphComponent.CONN_PADDING_FACTOR;
 				t._bounds.setBounds((int) left+2, (int) top, (int) widthPlaned-4,
 						(int) height);
 			}
+			
+			// if this is row of cursor, recount also cursor.
+			if(_graph._cursorTempTask != null && _graph._cursorTempTask._row == row) {
+				double left = _graph.timeToX(_graph._cursorTempTask.getStartTime());
+				double widthPlaned = _graph._cursorTempTask.getRealDuration() * _graph._dayWidth;
+				_graph._cursorTempTask._bounds.setBounds((int) left+2, (int) top, (int) widthPlaned-4,
+						(int) height);
+			}
+			
+			
 			rowIndex++;
 			
 		} // for all rows

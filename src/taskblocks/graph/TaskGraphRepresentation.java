@@ -94,6 +94,7 @@ public class TaskGraphRepresentation {
 				if(row == null) {
 					row = new TaskRow(manObj);
 					row._name = _model.getManName(manObj);
+					row._workload = _model.getManWorkload(manObj);
 					rows.add(row);
 					row._index = rows.size()-1;
 				}
@@ -116,6 +117,7 @@ public class TaskGraphRepresentation {
 				if(row == null) {
 					row = new TaskRow(manObj);
 					row._name = _model.getManName(manObj);
+					row._workload = _model.getManWorkload(manObj);
 					rows.add(row);
 					row._index = rows.size()-1;
 				}
@@ -321,7 +323,7 @@ public class TaskGraphRepresentation {
 				preceedingTasksUserObjs[i] = t._incommingConnections[i]._fromTask._userObject;
 			}
 			
-			_model.updateTask(t._userObject, t._row._userManObject, t.getStartTime(), t.getDuration(), t.getActualDuration(), preceedingTasksUserObjs);
+			_model.updateTask(t._userObject, t._row._userManObject, t.getStartTime(), t.getEffort(), t.getActualDuration(), preceedingTasksUserObjs);
 		}
 	}
 	

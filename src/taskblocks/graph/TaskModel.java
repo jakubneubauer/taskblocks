@@ -52,4 +52,6 @@ public interface TaskModel {
 	public void removeTask(Object task);
 	/** removes man from the model */
 	public void removeMan(Object man);
+	/** Returns workload of specified worker */
+	double getManWorkload(Object man);
 }

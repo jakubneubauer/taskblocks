@@ -44,7 +44,10 @@ class Task extends GraphObject {
 	/** How many working days the task takes */
 	private long _duration;
 	
-	/** How many working days the task takes */
+	/**
+	 * How many working days the task takes
+	 * (Currently not displayed)
+	 */
 	private long _actualDuration;
 	
 	/** When the task starts */
@@ -84,8 +87,12 @@ class Task extends GraphObject {
 	}
 
 	/** Returns the netto duration of a task */
-	public long getDuration() {
+	public long getEffort() {
 		return _duration;
+	}
+	
+	public long getDuration() {
+		return (long)(getEffort()/getWorkload());
 	}
 	
 	/**
@@ -106,23 +113,23 @@ class Task extends GraphObject {
 		this._duration = duration;
 		long oldActualDuration = _actualDuration;
 		this._actualDuration = actual;
-		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
 		if( (oldDuration != _duration) || (oldActualDuration != _actualDuration) ){
 			_builder.setDirty();
 		}
 	}
 	
-	public void setDuration(long duration) {
+	public void setEffort(long duration) {
 		long oldDuration = _duration;
 		this._duration = duration;
-		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
 		if(oldDuration != _duration) {
 			_builder.setDirty();
 		}
 	}
-
+	
 	public long getFinishTime() {
 		return _finishTime;
 	}
@@ -138,7 +145,7 @@ class Task extends GraphObject {
 		long oldTime = _startTime;
 		_startTime = time;
 		repairStartTime();
-		_finishTime = Utils.countFinishTime(_startTime, _duration);
+		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
 		if(_startTime != oldTime) {
 			_builder.setDirty();
@@ -162,6 +169,14 @@ class Task extends GraphObject {
 	
 	public String getComment() {
 		return _comment;
+	}
+
+	public double getWorkload() {
+		return _row._workload;
+	}
+	
+	public String toString() {
+		return "userObj: " + _userObject.toString() + ", row: " + _row.toString() + ", bounds: " + _bounds;
 	}
 
 }

@@ -32,13 +32,22 @@ public class Utils {
 
 	/** The first saturday since the Epoch (time 0). */
 	public static final long FIRST_SATURDAY = 1;
-	
+
+	/**
 	/**
 	 * This method adds 'duration' working days to 'startTime'. Saturday is also the regular
 	 * end of the work. (This is different from beginning of work - there saturday should be recounted
 	 * to monday
+	 * 
+	 * @param startTime
+	 * @param effort
+	 * @param workload - workload of a worker, between 0 and 1.
+	 * @return
 	 */
-	public static long countFinishTime(long startTime, long duration) {
+	public static long countFinishTime(long startTime, long effort, double workload) {
+		
+		long duration = (long)((double)effort / workload);
+		
 		long startDayInWeek = getDayInWeek(startTime);
 		
 		long durationWeeks = (duration) / 5;
@@ -66,7 +75,7 @@ public class Utils {
 	}
 	
 	/**
-	 * Repairs starting time of task - saturday and sunday are changed to monday.
+	 * Repairs starting time of task - saturday and sunday are changed to next monday.
 	 * @param startTime
 	 * @return
 	 */

@@ -72,7 +72,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		long lastFinishTime = 0;
 		for(TaskImpl tmpTask: _model._tasks) {
 			if(t.getMan() == tmpTask.getMan()) {
-				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getDuration());
+				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getDuration(), tmpTask.getWorkload());
 				if(lastFinishTime < finish) {
 					lastFinishTime = finish;
 				}

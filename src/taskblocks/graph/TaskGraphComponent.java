@@ -109,6 +109,9 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 	Rectangle _contentBounds = new Rectangle();
 	
 	int _scrollTop;
+
+	/** Cursor - means shadow version of task that is being moved */
+	Task _cursorTempTask;
 	
 	public TaskGraphComponent(TaskModel model, TaskGraphPainter painter) {
 		_painter = painter;
@@ -172,8 +175,25 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 		synchronized(_builder) {
 			Insets insets = getInsets();
 
-			recountBounds();
 			// recount boundaries and positions and paddings if neccessary
+			recountBounds();
+
+			// if cursor should be painted...
+			if(_mouseHandler._cursorTaskRow != null && _mouseHandler._cursorTime >= 0 && _mouseHandler._pressedTask != null) {
+				if(_cursorTempTask == null) {
+					_cursorTempTask = new Task(null, null);
+				}
+				Task taskToMove = _mouseHandler._pressedTask;
+				_cursorTempTask._builder = this._builder;
+				_cursorTempTask._userObject = taskToMove._userObject;
+				_cursorTempTask._row = _mouseHandler._cursorTaskRow;
+				_cursorTempTask.setEffort(taskToMove.getEffort());
+				_cursorTempTask.setStartTime(_mouseHandler._cursorTime);
+				_builder.setPaintDirty();
+			} else {
+				_cursorTempTask = null;
+			}
+			
 			if(_builder.isPaintDirty()) {
 				TaskLayouter.recountBounds(_graphTop, ROW_HEIGHT, _builder, this, g2);
 			}
@@ -245,7 +265,7 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 			paintCursor(g2);
 			
 			// paint just being created conection
-			if(_mouseHandler._dragMode == 4) {
+			if(_mouseHandler._dragMode == GraphMouseHandler.DM_NEW_CONNECTION) {
 				g2.setColor(Color.RED);
 				if(_mouseHandler._destTask != null && _mouseHandler._destTask != _mouseHandler._pressedTask) {
 					_painter.paintTask(_mouseHandler._destTask._userObject, g2, _mouseHandler._destTask._bounds, true);
@@ -470,19 +490,9 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 	}
 	
 	private void paintCursor(Graphics2D g2) {
-		if(_mouseHandler._cursorTaskRow != null && _mouseHandler._cursorTime >= 0 && _mouseHandler._pressedTask != null) {
-			
-			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-			int y = _mouseHandler._cursorTaskRow._topPosition;
-			
-			int transX = (int)((_mouseHandler._cursorTime - _mouseHandler._pressedTask.getStartTime())*_dayWidth);
-			int transY = y - _mouseHandler._pressedTask._row._topPosition;
-			g2.translate(transX, transY);
-			_painter.paintTask(_mouseHandler._pressedTask._userObject, g2, _mouseHandler._pressedTask._bounds, true);
-			g2.setColor(Color.BLACK);
-			g2.setStroke(new BasicStroke(3));
-			g2.drawLine(_mouseHandler._pressedTask._bounds.x, _mouseHandler._pressedTask._bounds.y+3, _mouseHandler._pressedTask._bounds.x, _mouseHandler._pressedTask._bounds.y + _mouseHandler._pressedTask._bounds.height-4);
-			g2.translate(-transX, -transY);
+		if(_cursorTempTask != null) {
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+			_painter.paintTask(_cursorTempTask._userObject, g2, _cursorTempTask._bounds, true);
 		}
 	}
 

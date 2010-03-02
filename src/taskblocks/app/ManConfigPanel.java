@@ -24,7 +24,10 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SpinnerNumberModel;
 
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskModelImpl;
@@ -33,6 +36,7 @@ import taskblocks.modelimpl.TaskModelImpl;
 public class ManConfigPanel extends JPanel {
 
 	JTextField nameTF;
+	JSpinner _workloadSpin;
 	ManImpl _man;
 	TaskModelImpl _model;
 
@@ -45,8 +49,10 @@ public class ManConfigPanel extends JPanel {
 	private void buildGui() {
 		// create components
 		JPanel contentP = this;
-		JLabel nameL = new JLabel("Worker name:");
+		JLabel nameL = new JLabel("Name:");
+		JLabel workloadL = new JLabel("Workload:");
 		nameTF = new JTextField(15);
+		_workloadSpin=new JSpinner(new SpinnerNumberModel(100, 10, 100, 10));
 		
 		//layout components
 		contentP.setLayout(new GridBagLayout());
@@ -59,6 +65,8 @@ public class ManConfigPanel extends JPanel {
 		gc.anchor = GridBagConstraints.EAST;
 		//
 		contentP.add(nameL, gc);
+		gc.gridy++;
+		contentP.add(workloadL, gc);
 		
 		// add edit fields
 		gc.gridx++; gc.gridy=0;
@@ -67,6 +75,8 @@ public class ManConfigPanel extends JPanel {
 		gc.insets.left = 8;
 		//
 		contentP.add(nameTF, gc);
+		gc.gridy++;
+		contentP.add(_workloadSpin, gc);
 		
 		// set component properties
 		nameTF.setText(_man.getName());

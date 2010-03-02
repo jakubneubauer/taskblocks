@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -70,6 +71,7 @@ public class ProjectSaveLoad {
 	
 	public static final String VERSION_A = "version";
 	public static final String NAME_A = "name";
+	public static final String WORKLOAD_A = "workload";
 	public static final String ID_A = "id";
 	public static final String START_A = "start";
 	public static final String DURATION_A = "duration";
@@ -132,9 +134,18 @@ public class ProjectSaveLoad {
 				Element[] manEs = Utils.getChilds(mansE, MAN_E);
 				for(Element manE: manEs) {
 					String manName = manE.getAttribute(NAME_A);
+					String manWorkload = manE.getAttribute(WORKLOAD_A);
 					String manId = manE.getAttribute(ID_A);
 					ManImpl man = new ManImpl();
 					man.setName(manName);
+					if(manWorkload != null && manWorkload.trim().length() > 0) {
+						try {
+							man.setWorkload(Double.parseDouble(manWorkload.trim())/100.0);
+						} catch(NumberFormatException e) {
+							// TODO Jakub: handle exception
+							System.err.println("Cannot parse man's workload '" + manWorkload + "'");
+						}
+					}
 					mans.put(manId, man);
 				}
 			}
@@ -289,6 +300,7 @@ public class ProjectSaveLoad {
 		Element manE = mansE.getOwnerDocument().createElement(MAN_E);
 		manE.setAttribute(ID_A, man._id);
 		manE.setAttribute(NAME_A, man.getName());
+		manE.setAttribute(WORKLOAD_A, String.valueOf((int)(man.getWorkload()*100)));
 		mansE.appendChild(manE);
 	}
 	

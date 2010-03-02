@@ -121,4 +121,12 @@ public class TaskImpl {
 	public void setBugId(String bugId) {
 		_bugId = bugId;
 	}
+	
+	public double getWorkload() {
+		return _man.getWorkload();
+	}
+	
+	public String toString() {
+		return "<" + _name + ">";
+	}
 }

@@ -42,9 +42,16 @@ class TaskRow extends GraphObject {
 	
 	String _name;
 	
+	/** Workload of the associated worker. will be used to enlarge his tasks duration */
+	double _workload;
+	
 	Rectangle _bounds = new Rectangle();
 	
 	public TaskRow(Object manObj) {
 		_userManObject = manObj;
+	}
+	
+	public String toString() {
+		return _name;
 	}
 }

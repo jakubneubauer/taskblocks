@@ -104,4 +104,9 @@ public class TaskModelImpl implements TaskModel{
 	public void removeTask(Object task) {
 		_tasks = (TaskImpl[])ArrayUtils.removeFromArray(_tasks, task);
 	}
+
+	@Override
+	public double getManWorkload(Object man) {
+		return ((ManImpl)man).getWorkload();
+	}
 }
