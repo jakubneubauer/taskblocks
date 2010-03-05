@@ -299,14 +299,14 @@ public class TaskGraphRepresentation {
 				Arrays.sort(row._tasks, taskStartTimeComparator);
 				
 				// FIXED ISSUE #10 Shrink only tasks that are not yet started (ignore those before "now")
-				boolean someWasAlreadyShrinked = false;
-				//row._tasks[0].setStartTime(firstTime);
-				for(int i = 1; i < row._tasks.length; i++) {
-					if(someWasAlreadyShrinked) {
-						row._tasks[i].setStartTime(row._tasks[i-1].getFinishTime());
-					} else {
-						if(_tasks[i].getStartTime() > firstTime) {
+				// and those that are moved are never moved before now.
+				for(int i = 0; i < row._tasks.length; i++) {
+
+					if(row._tasks[i].getStartTime() > firstTime) {
+						if(i == 0) {
 							row._tasks[i].setStartTime(firstTime);
+						} else {
+							row._tasks[i].setStartTime(Math.max(row._tasks[i-1].getFinishTime(), firstTime));
 						}
 					}
 				}
