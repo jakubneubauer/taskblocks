@@ -423,9 +423,9 @@ public class BugzillaExportDialog extends JDialog {
 			_tasksData[i][INDEX_NAME] = task.getName();
 			_tasksData[i][INDEX_MAN] = task.getMan().getName();
 			_tasksData[i][INDEX_HOURS] = Integer.valueOf(
-					(int) ((double) task.getDuration() * 8d * 0.8));
+					(int) ((double) task.getDuration() * 8d));
 			_tasksData[i][INDEX_REMAINS] = Integer.valueOf(
-					(int) ((double) (task.getDuration()-task.getActualDuration()) * 8d * 0.8));
+					(int) ((double) (task.getDuration()-task.getActualDuration()) * 8d));
 			if(((Integer)_tasksData[i][INDEX_REMAINS]) < 0) {
 				_tasksData[i][INDEX_REMAINS] = 0;
 			}
@@ -484,6 +484,8 @@ public class BugzillaExportDialog extends JDialog {
 						if (((Boolean) _tasksData[i][INDEX_ENABLED]).booleanValue()) {
 
 							final int row = i;
+							
+							// select the task row
 							SwingUtilities.invokeAndWait(new Runnable(){
 								public void run() {
 									_tasksTable.getSelectionModel().setSelectionInterval(row, row);
@@ -493,6 +495,8 @@ public class BugzillaExportDialog extends JDialog {
 							
 							if(submitTask(i, _tasksData[i], _tasks[i])) {
 								success++;
+								
+								// uncheck the task row
 								SwingUtilities.invokeAndWait(new Runnable(){
 									public void run() {
 										_tasksData[row][INDEX_ENABLED] = Boolean.FALSE;

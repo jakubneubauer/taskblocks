@@ -68,20 +68,20 @@ public class ManConfigDialog extends ConfigDialogStub  {
 		if(isCreating()) {
 			addMan();
 		} else {
-			updateMan();
+			fillMan(_man);
 		}
 	}
 
-	private void updateMan() {
-		throw new IllegalArgumentException("Not yet implemented");
+	private void fillMan(ManImpl man) {
+		man.setName(_cfgPanel.nameTF.getText());
+		man.setWorkload(((Number)_cfgPanel._workloadSpin.getValue()).doubleValue()/100.0);
 	}
 
 	private void addMan() {
 		_graph.getGraphRepresentation().updateModel();
 		ManImpl man = new ManImpl();
-		man.setName(_cfgPanel.nameTF.getText());
-		man.setWorkload(((Number)_cfgPanel._workloadSpin.getValue()).doubleValue()/100.0);
 		_model.addMan(man);
+		fillMan(man);
 		
 		_graph.setModel(_model);
 		_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag

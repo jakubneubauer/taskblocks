@@ -59,6 +59,7 @@ import taskblocks.graph.TaskGraphComponent;
 import taskblocks.io.BugzillaExportDialog;
 import taskblocks.io.ProjectSaveLoad;
 import taskblocks.io.WrongDataException;
+import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
 import taskblocks.modelimpl.TaskPainterImpl;
@@ -578,7 +579,24 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 	}
 
-	public void mouseClicked(Object task, MouseEvent e) {
+	private void configureMan(ManImpl man) {
+		_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+		if(ManConfigDialog.openDialog(this, man, _taskModel, _graph, false)) {
+			_graph.setModel(_taskModel); // model -> GUI udate
+			_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
+			_graph.repaint();
+		}
+	}
+
+	public void graphClicked(MouseEvent e) {
+	}
+
+	public void manClicked(Object man, MouseEvent e) {
+		if(man != null && e.getClickCount() >= 2) {
+			configureMan((ManImpl)man);
+		}
+	}
+	public void taskClicked(Object task, MouseEvent e) {
 		if(task != null && e.getClickCount() >= 2) {
 			configureTask((TaskImpl)task);
 		}

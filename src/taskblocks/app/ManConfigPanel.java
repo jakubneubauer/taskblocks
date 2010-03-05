@@ -50,7 +50,7 @@ public class ManConfigPanel extends JPanel {
 		// create components
 		JPanel contentP = this;
 		JLabel nameL = new JLabel("Name:");
-		JLabel workloadL = new JLabel("Workload:");
+		JLabel workloadL = new JLabel("Workload (%):");
 		nameTF = new JTextField(15);
 		_workloadSpin=new JSpinner(new SpinnerNumberModel(100, 10, 100, 10));
 		
@@ -80,6 +80,7 @@ public class ManConfigPanel extends JPanel {
 		
 		// set component properties
 		nameTF.setText(_man.getName());
+		_workloadSpin.setValue((int)(_man.getWorkload()*100.0));
 	}
 
 

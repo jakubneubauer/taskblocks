@@ -23,5 +23,7 @@ import java.awt.event.MouseEvent;
 
 public interface GraphActionListener {
 
-	public void mouseClicked(Object task, MouseEvent e);
+	public void taskClicked(Object task, MouseEvent e);
+	public void manClicked(Object man, MouseEvent e);
+	public void graphClicked(MouseEvent e);
 }

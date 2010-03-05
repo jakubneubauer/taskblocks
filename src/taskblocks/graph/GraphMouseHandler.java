@@ -106,6 +106,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		Point p = e.getPoint();
 		Object o = _graph.findObjectOnPo(p.x, p.y);
 		Task t = null;
+		TaskRow r = null;
 		
 		
 		GraphObject go = null;
@@ -114,6 +115,8 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		}
 		if(o instanceof Task) {
 			t = (Task)o;
+		} else if(o instanceof TaskRow) {
+			r = (TaskRow)o;
 		} else if(o instanceof Pair) {
 			Pair<Task, Integer> pressedObj = (Pair<Task, Integer>)o;
 			t = (Task)pressedObj.fst;
@@ -169,7 +172,14 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		
 		
 		if(_graph._grActListener != null) {
-			_graph._grActListener.mouseClicked(t == null ? null : t._userObject, e);
+			if(t != null) {
+				_graph._grActListener.taskClicked(t._userObject, e);
+			} else if (r != null) {
+				_graph._grActListener.manClicked(r._userManObject, e);
+			} else {
+				_graph._grActListener.graphClicked(e);
+			}
+			
 		}
 	}
 	
