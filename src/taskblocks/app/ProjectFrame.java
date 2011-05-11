@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
@@ -63,9 +64,46 @@ import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
 import taskblocks.modelimpl.TaskPainterImpl;
+import taskblocks.modelimpl.UndoActionTaskModify;
+import taskblocks.modelimpl.UndoManager;
 
 public class ProjectFrame extends JFrame implements WindowListener, GraphActionListener {
 	
+	public class EditMenuListener implements MenuListener {
+
+		public void menuCanceled(MenuEvent arg0) {}
+
+		public void menuDeselected(MenuEvent arg0) {
+		}
+
+		public void menuSelected(MenuEvent arg0) {
+			JMenu editMenu = (JMenu) arg0.getSource();
+			final UndoManager um = _taskModel.getUndoManager();
+			editMenu.removeAll();
+			if(um.canUndo()) {
+				editMenu.add(new AbstractAction("Undo " + um.getFirstUndoActionLabel()){
+					public void actionPerformed(ActionEvent arg0) {
+						_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+						um.undo();
+						_graph.setModel(_taskModel); // model -> GUI
+						_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
+						_graph.repaint();
+					}});
+			}
+			if(um.canRedo()) {
+				editMenu.add(new AbstractAction("Redo " + um.getFirstRedoActionLabel()){
+					public void actionPerformed(ActionEvent arg0) {
+						_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+						um.redo();
+						_graph.setModel(_taskModel); // model -> GUI
+						_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
+						_graph.repaint();
+					}});
+			}
+		}
+
+	}
+
 	static int _numWindows;
 	static List<JMenuItem> _windowMenuItems = new ArrayList<JMenuItem>();
 
@@ -370,6 +408,10 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menuFile.add(_closeFileAction).setAccelerator(getAcceleratorStroke('W'));
 		menu.add(menuFile);
 		
+		JMenu menuEdit = new JMenu("Edit");
+		menuEdit.addMenuListener(new EditMenuListener());
+		menu.add(menuEdit);
+		
 		JMenu menuProject = new JMenu("Project");
 		menuProject.add(_newTaskAction).setAccelerator(getAcceleratorStroke('T'));
 		menuProject.add(_newManAction).setAccelerator(getAcceleratorStroke('U'));
@@ -572,10 +614,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	
 	private void configureTask(TaskImpl t) {
 		_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+		TaskImpl before = t.clone();
 		if(TaskConfigDialog.openDialog(this, t, _taskModel, _graph, false)) {
 			_graph.setModel(_taskModel); // model -> GUI udate
 			_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 			_graph.repaint();
+			_taskModel.getUndoManager().addAction(new UndoActionTaskModify(_taskModel, before, t));
 		}
 	}
 

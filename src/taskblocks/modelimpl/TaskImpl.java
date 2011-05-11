@@ -23,7 +23,7 @@ import java.awt.Color;
 
 import taskblocks.utils.Colors;
 
-public class TaskImpl {
+public class TaskImpl implements Cloneable {
 	
 	private String _name;
 	private long _startTime;
@@ -40,6 +40,28 @@ public class TaskImpl {
 	
 	/** Used only when saving */
 	public String _id;
+	
+	public TaskImpl clone() {
+		try {
+			TaskImpl t = (TaskImpl)super.clone();
+			return t;
+		} catch(CloneNotSupportedException e) {
+			// NEVER GET HERE
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public void updateFrom(TaskImpl t) {
+		_name = t._name;
+		_bugId = t._bugId;
+		_startTime = t._startTime;
+		_duration = t._duration;
+		_actualDuration = t._actualDuration;
+		_predecessors = t._predecessors;
+		_man = t._man;
+		_comment = t._comment;
+		_colorLabel = t._colorLabel;
+	}
 	
 	public long getDuration() {
 		return _duration;

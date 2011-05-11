@@ -26,10 +26,16 @@ public class TaskModelImpl implements TaskModel{
 	
 	public TaskImpl[] _tasks;
 	public ManImpl[] _mans;
+	UndoManager _undoManager;
 	
 	public TaskModelImpl(TaskImpl[] tasks, ManImpl[] mans) {
 		_tasks = tasks;
 		_mans = mans;
+		_undoManager = new UndoManager();
+	}
+	
+	public UndoManager getUndoManager() {
+		return _undoManager;
 	}
 
 	public long getTaskDuration(Object task) {

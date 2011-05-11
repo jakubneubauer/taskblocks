@@ -39,10 +39,10 @@ public class ColorLabel {
 		new ColorLabel("Gray", new Color(200,200,200), 5),
 	};
 	
-	public Color _color;
-	public String _name;
-	public Icon  _icon;
-	public int _index;
+	final public Color _color;
+	final public String _name;
+	final public Icon  _icon;
+	final public int _index;
 	public ColorLabel(String name, Color color, int index) {
 		_name = name;
 		_color = color;
