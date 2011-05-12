@@ -54,4 +54,7 @@ public interface TaskModel {
 	public void removeMan(Object man);
 	/** Returns workload of specified worker */
 	double getManWorkload(Object man);
+	
+	void beginUpdateGroup(String groupName);
+	void endUpdateGroup();
 }

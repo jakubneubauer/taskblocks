@@ -75,16 +75,45 @@ public class TaskModelImpl implements TaskModel{
 	}
 
 	public void updateTask(Object task, Object taskMan, long startTime, long duration, long actualDuration, Object[] precedingTasks) {
+		TaskImpl prev = null;
 		TaskImpl t = (TaskImpl)task;
-		t.setMan((ManImpl)taskMan);
-		t.setStartTime(startTime);
-		t.setDuration(duration);
-		t.setActualDuration( actualDuration );
-		TaskImpl[] preds = new TaskImpl[precedingTasks.length];
-		for(int i = 0; i < precedingTasks.length; i++) {
-			preds[i] = (TaskImpl)precedingTasks[i];
+		if(t.getMan() != taskMan) {
+			if(prev == null) {
+				prev = t.clone();
+			}
+			t.setMan((ManImpl)taskMan);
 		}
-		t.setPredecessors((TaskImpl[])preds);
+		if(t.getStartTime() != startTime) {
+			if(prev == null) {
+				prev = t.clone();
+			}
+			t.setStartTime(startTime);
+		}
+		if(t.getDuration() != duration) {
+			if(prev == null) {
+				prev = t.clone();
+			}
+			t.setDuration(duration);
+		}
+		if(t.getActualDuration() != actualDuration) {
+			if(prev == null) {
+				prev = t.clone();
+			}
+			t.setActualDuration( actualDuration );
+		}
+		if(!ArrayUtils.arrayEqualsExceptNull(precedingTasks, t.getPredecessors())) {
+			if(prev == null) {
+				prev = t.clone();
+			}
+			TaskImpl[] preds = new TaskImpl[precedingTasks.length];
+			for(int i = 0; i < precedingTasks.length; i++) {
+				preds[i] = (TaskImpl)precedingTasks[i];
+			}
+			t.setPredecessors((TaskImpl[])preds);
+		}
+		if(prev != null) {
+			_undoManager.addAction(new UndoActionTaskModify(this, prev, t));
+		}
 	}
 
 	public String getManName(Object man) {
@@ -113,5 +142,15 @@ public class TaskModelImpl implements TaskModel{
 
 	public double getManWorkload(Object man) {
 		return ((ManImpl)man).getWorkload();
+	}
+
+	@Override
+	public void beginUpdateGroup(String groupName) {
+		_undoManager.beginGroup(groupName);
+	}
+
+	@Override
+	public void endUpdateGroup() {
+		_undoManager.endGroup();
 	}
 }

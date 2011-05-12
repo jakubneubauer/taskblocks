@@ -22,6 +22,8 @@ package taskblocks.utils;
 
 import java.lang.reflect.Array;
 
+import taskblocks.modelimpl.TaskImpl;
+
 /**
  * Set of utilities used to manipulate arrays.
  * 
@@ -77,5 +79,39 @@ public class ArrayUtils {
 		System.arraycopy(array, 0, newArray, 0, i);
 		System.arraycopy(array, i+1, newArray, i, array.length-i-1);
 		return newArray;
+	}
+
+	public static boolean arrayEqualsExceptNull(Object[] a1, Object[] a2) {
+		if ((a1 == null) && (a2 == null)) { return true; }
+		if(a1 == null && a2 != null && a2.length == 0) { return true; }
+		if(a2 == null && a1 != null && a1.length == 0) { return true; }
+		if (((a1 == null) && (a2 != null)) || ((a2 == null) && (a1 != null))) { return false; }
+		if (a1.length != a2.length) { return false; }
+		for (int i = 0; i < a1.length; i++) {
+			if ((a1[i] == null) && (a2[i] == null)) {
+				continue;
+			}
+			if ((a1 != null) && a1[i].equals(a2[i])) {
+				continue;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public static boolean arrayEquals(Object[] a1, Object[] a2) {
+		if ((a1 == null) && (a2 == null)) { return true; }
+		if (((a1 == null) && (a2 != null)) || ((a2 == null) && (a1 != null))) { return false; }
+		if (a1.length != a2.length) { return false; }
+		for (int i = 0; i < a1.length; i++) {
+			if ((a1[i] == null) && (a2[i] == null)) {
+				continue;
+			}
+			if ((a1 != null) && a1[i].equals(a2[i])) {
+				continue;
+			}
+			return false;
+		}
+		return true;
 	}
 }

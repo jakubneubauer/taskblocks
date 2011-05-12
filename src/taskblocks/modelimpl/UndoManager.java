@@ -7,17 +7,50 @@ public class UndoManager {
 	
 	int _index;
 	List<UndoAction> _actions;
+	UndoActionGroup _group;
 	
 	public UndoManager() {
 		_actions = new ArrayList<UndoAction>();
 	}
 	
-	public void addAction(UndoAction a) {
-		_actions.add(_index, a);
-		_index++;
+	public void beginGroup(String name) {
+		System.out.println("begin group " + name);
+		trimAtIndex();
+		if(_group != null && !_group.isEmpty()) {
+			addActionImpl(_group);
+		}
+		_group = new UndoActionGroup(name);
+	}
+	
+	public void endGroup() {
+		System.out.println("end group");
+		if(_group != null && !_group.isEmpty()) {
+			addActionImpl(_group);
+		}
+		_group = null;
+	}
+	
+	private void trimAtIndex() {
 		if(_index < _actions.size()) {
 			_actions.subList(_index, _actions.size()).clear();
 		}
+	}
+	
+	private void addActionImpl(UndoAction a) {
+		_actions.add(_index, a);
+		_index++;
+		trimAtIndex();
+	}
+	
+	public void addAction(UndoAction a) {
+		System.out.println("addAction");
+		if(_group != null) {
+			_group.addAction(a);
+		} else {
+			addActionImpl(a);
+		}
+		System.out.println("Undo queue: " + _actions);
+		System.out.println("Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public boolean canUndo() {
@@ -29,6 +62,7 @@ public class UndoManager {
 	}
 	
 	public void undo() {
+		endGroup();
 		if(_index <= 0) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -37,6 +71,7 @@ public class UndoManager {
 	}
 	
 	public void redo() {
+		endGroup();
 		if(_index >= _actions.size()) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -44,7 +79,11 @@ public class UndoManager {
 		_actions.get(_index-1).redo();
 	}
 	
-	public String getFirstUndoActionLabel() { 
+	public String getFirstUndoActionLabel() {
+		if(_group != null && !_group.isEmpty()) {
+			return _group.getLabel();
+		}
+
 		if(_index > 0) {
 			return _actions.get(_index - 1).getLabel();
 		}

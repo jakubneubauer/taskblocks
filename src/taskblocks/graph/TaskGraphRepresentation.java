@@ -315,6 +315,14 @@ public class TaskGraphRepresentation {
 		recountStartingTimes();
 	}
 	
+	public void beginUpdateModelGroup(String groupName) {
+		_model.beginUpdateGroup(groupName);
+	}
+
+	public void endUpdateModelGroup() {
+		_model.endUpdateGroup();
+	}
+
 	public void updateModel() {
 		for(Task t: _tasks) {
 			// build array of preceeding tasks

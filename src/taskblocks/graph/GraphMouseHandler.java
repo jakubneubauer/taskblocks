@@ -362,6 +362,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 			} else if(TaskGraphComponent.RIGHT.equals(direction)) {
 				_dragMode = DM_TASK_RIGHT_BOUNDARY;
 			}
+			_graph._builder.beginUpdateModelGroup(_pressedTask == null ? "" : "change '" + _graph._model.getTaskName(_pressedTask._userObject) + "'");
 			return;
 		}
 		
@@ -379,6 +380,8 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		if(e.getButton() != MouseEvent.BUTTON1) {
 			_pressedTask = null;
 		}
+		
+		_graph._builder.beginUpdateModelGroup(_pressedTask == null ? "" : "change '" + _graph._model.getTaskName(_pressedTask._userObject) + "'");
 		
 		if(_pressedTask != null && (e.getModifiers() & MouseEvent.SHIFT_MASK) != 0) {
 			
@@ -406,7 +409,6 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 	}
 	
 	public void mouseReleased(MouseEvent e) {
-		
 		if(_cursorTaskRow != null && _cursorTime >= 0 && _pressedTask != null) {
 			if(_cursorTaskRow != _pressedTask.getRow()) {
 				// change man of the task
@@ -440,6 +442,7 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 		}
 		
 		_graph._builder.updateModel();
+		_graph._builder.endUpdateModelGroup();
 		
 		_graph.changeCursor(e.getPoint());
 		_dragMode = DM_NOTHING;

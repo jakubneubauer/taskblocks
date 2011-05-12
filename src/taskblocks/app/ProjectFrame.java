@@ -72,16 +72,15 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	public class EditMenuListener implements MenuListener {
 
 		public void menuCanceled(MenuEvent arg0) {}
-
-		public void menuDeselected(MenuEvent arg0) {
-		}
+		public void menuDeselected(MenuEvent arg0) {}
 
 		public void menuSelected(MenuEvent arg0) {
 			JMenu editMenu = (JMenu) arg0.getSource();
 			final UndoManager um = _taskModel.getUndoManager();
 			editMenu.removeAll();
+			JMenuItem mi;
 			if(um.canUndo()) {
-				editMenu.add(new AbstractAction("Undo " + um.getFirstUndoActionLabel()){
+				mi = editMenu.add(new AbstractAction("Undo " + um.getFirstUndoActionLabel()){
 					public void actionPerformed(ActionEvent arg0) {
 						_graph.getGraphRepresentation().updateModel(); // GUI -> model update
 						um.undo();
@@ -89,9 +88,15 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 						_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 						_graph.repaint();
 					}});
+			} else {
+				mi = new JMenuItem("Undo");
+				mi.setEnabled(false);
+				editMenu.add(mi);
 			}
+			mi.setFont(mi.getFont().deriveFont(Font.PLAIN));
+
 			if(um.canRedo()) {
-				editMenu.add(new AbstractAction("Redo " + um.getFirstRedoActionLabel()){
+				mi = editMenu.add(new AbstractAction("Redo " + um.getFirstRedoActionLabel()){
 					public void actionPerformed(ActionEvent arg0) {
 						_graph.getGraphRepresentation().updateModel(); // GUI -> model update
 						um.redo();
@@ -99,7 +104,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 						_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 						_graph.repaint();
 					}});
+			} else {
+				mi = new JMenuItem("Redo");
+				mi.setEnabled(false);
+				editMenu.add(mi);
 			}
+			mi.setFont(mi.getFont().deriveFont(Font.PLAIN));
 		}
 
 	}
