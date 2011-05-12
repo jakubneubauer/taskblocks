@@ -27,6 +27,7 @@ import taskblocks.modelimpl.ColorLabel;
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
+import taskblocks.modelimpl.UndoActionAddTask;
 import taskblocks.utils.Utils;
 
 public class TaskConfigDialog extends ConfigDialogStub  {
@@ -73,6 +74,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		for(TaskImpl tmpTask: _model._tasks) {
 			if(t.getMan() == tmpTask.getMan()) {
 				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getDuration(), tmpTask.getWorkload());
+				finish = Utils.repairStartTime(finish);
 				if(lastFinishTime < finish) {
 					lastFinishTime = finish;
 				}
@@ -89,6 +91,8 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 		_graph.repaint();
 		_graph.scrollToTaskVisible(t);
+		
+		_model.getUndoManager().addAction(new UndoActionAddTask(_model, t));
 		
 		// now focus to name and set text field selection
 		_cfgPanel.nameTF.setSelectionStart(0);

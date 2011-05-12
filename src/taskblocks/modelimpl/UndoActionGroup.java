@@ -14,12 +14,10 @@ public class UndoActionGroup implements UndoAction {
 		_actions = new ArrayList<UndoAction>();
 	}
 	
-	@Override
 	public String getLabel() {
 		return _name;
 	}
 
-	@Override
 	public void undo() {
 		for(int i = _actions.size()-1; i >= 0; i--) {
 			_actions.get(i).undo();
@@ -27,7 +25,6 @@ public class UndoActionGroup implements UndoAction {
 		_isUndone = true;
 	}
 
-	@Override
 	public void redo() {
 		for(int i = 0; i < _actions.size(); i++) {
 			_actions.get(i).redo();

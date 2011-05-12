@@ -137,6 +137,11 @@ public class TaskModelImpl implements TaskModel{
 	}
 
 	public void removeTask(Object task) {
+		removeTaskImpl(task);
+		_undoManager.addAction(new UndoActionRemoveTask(this, (TaskImpl)task));
+	}
+
+	public void removeTaskImpl(Object task) {
 		_tasks = (TaskImpl[])ArrayUtils.removeFromArray(_tasks, task);
 	}
 
@@ -144,12 +149,10 @@ public class TaskModelImpl implements TaskModel{
 		return ((ManImpl)man).getWorkload();
 	}
 
-	@Override
 	public void beginUpdateGroup(String groupName) {
 		_undoManager.beginGroup(groupName);
 	}
 
-	@Override
 	public void endUpdateGroup() {
 		_undoManager.endGroup();
 	}

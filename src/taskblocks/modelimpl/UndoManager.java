@@ -28,6 +28,7 @@ public class UndoManager {
 			addActionImpl(_group);
 		}
 		_group = null;
+		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	private void trimAtIndex() {
@@ -49,8 +50,7 @@ public class UndoManager {
 		} else {
 			addActionImpl(a);
 		}
-		System.out.println("Undo queue: " + _actions);
-		System.out.println("Group: " + (_group == null ? "null" : (_group._actions)));
+		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public boolean canUndo() {
@@ -68,6 +68,7 @@ public class UndoManager {
 		}
 		_index--;
 		_actions.get(_index).undo();
+		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public void redo() {
@@ -77,6 +78,7 @@ public class UndoManager {
 		}
 		_index++;
 		_actions.get(_index-1).redo();
+		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public String getFirstUndoActionLabel() {
