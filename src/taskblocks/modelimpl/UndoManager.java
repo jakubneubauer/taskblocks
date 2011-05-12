@@ -13,11 +13,10 @@ public class UndoManager {
 	}
 	
 	public void addAction(UndoAction a) {
-		// TODO: nejak nefunguje
 		_actions.add(_index, a);
 		_index++;
 		if(_index < _actions.size()) {
-			_actions.subList(_index, _actions.size()-1).clear();
+			_actions.subList(_index, _actions.size()).clear();
 		}
 	}
 	
