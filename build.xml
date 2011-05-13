@@ -7,7 +7,7 @@
 <project name="Task Blocks" default="jar">
   <description>Build file for Task Blocks application</description>
   
-  <property name="appVersion" value="0.6"/>
+  <property name="appVersion" value="0.9 Pre"/>
   <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
 	
 
