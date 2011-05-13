@@ -3,18 +3,21 @@ package taskblocks.modelimpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 public class UndoManager {
 	
 	int _index;
 	List<UndoAction> _actions;
 	UndoActionGroup _group;
+	ChangeListener _changeListener;
 	
 	public UndoManager() {
 		_actions = new ArrayList<UndoAction>();
 	}
 	
 	public void beginGroup(String name) {
-		//System.out.println("begin group " + name);
 		if(_group != null && !_group.isEmpty()) {
 			addActionImpl(_group);
 		}
@@ -22,34 +25,27 @@ public class UndoManager {
 	}
 	
 	public void endGroup() {
-		//System.out.println("end group");
 		if(_group != null && !_group.isEmpty()) {
 			addActionImpl(_group);
 		}
 		_group = null;
-		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
-	}
-	
-	private void trimAtIndex() {
-		if(_index < _actions.size()) {
-			_actions.subList(_index, _actions.size()).clear();
-		}
 	}
 	
 	private void addActionImpl(UndoAction a) {
 		_actions.add(_index, a);
 		_index++;
-		trimAtIndex();
+		if(_index < _actions.size()) {
+			_actions.subList(_index, _actions.size()).clear();
+		}
+		fireChange();
 	}
 	
 	public void addAction(UndoAction a) {
-		//System.out.println("addAction");
 		if(_group != null) {
 			_group.addAction(a);
 		} else {
 			addActionImpl(a);
 		}
-		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public boolean canUndo() {
@@ -67,7 +63,7 @@ public class UndoManager {
 		}
 		_index--;
 		_actions.get(_index).undo();
-		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		fireChange();
 	}
 	
 	public void redo() {
@@ -77,7 +73,7 @@ public class UndoManager {
 		}
 		_index++;
 		_actions.get(_index-1).redo();
-		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		fireChange();
 	}
 	
 	public String getFirstUndoActionLabel() {
@@ -98,4 +94,13 @@ public class UndoManager {
 		return null;
 	}
 
+	public void setChangeListener(ChangeListener l) {
+		_changeListener = l;
+	}
+	
+	private void fireChange() {
+		if(_changeListener != null) {
+			_changeListener.stateChanged(new ChangeEvent(this));
+		}
+	}
 }

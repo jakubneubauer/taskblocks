@@ -165,8 +165,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 				_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 				_graph.repaint();
 			}
-			updateUndoRedoMenu();
 		}
+		
+	    public void setEnabled(boolean enabled) {
+	    	System.out.println("Enabling UNDO: " + enabled);
+	    	super.setEnabled(enabled);
+	    }
 	};
 	
 	MyAction _redoAction = new MyAction("Redo") {
@@ -181,7 +185,6 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 				_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 				_graph.repaint();
 			}
-			updateUndoRedoMenu();
 		}
 	};
 
@@ -257,7 +260,13 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		public void actionPerformed(ActionEvent e) {
 			_graph.deleteSelection();
 		}
-	}; 
+	};
+	
+	ChangeListener _undoRedoChangeListener = new ChangeListener() {
+		@Override public void stateChanged(ChangeEvent e) {
+			updateUndoRedoMenu();
+		}
+	};
 
 	/**
 	 * creates window with empty project.
@@ -267,12 +276,14 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		setTitle("New project");
 		_newCleanProject = true;
 		updateActionsEnableState();
+		updateUndoRedoMenu();
 	}
 	
 	public ProjectFrame(File f) throws WrongDataException {
 		this(new ProjectSaveLoad().loadProject(f));
 		setFile(f);
 		updateActionsEnableState();
+		updateUndoRedoMenu();
 	}
 	
 	private ProjectFrame(TaskModelImpl model) {
@@ -280,6 +291,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		// with filled background.
 		this.setIconImage(TaskBlocks.getImage("frameicon32.png").getImage());
 		_taskModel = model;
+		_taskModel.getUndoManager().setChangeListener(_undoRedoChangeListener);
 		buildGui();
 		pack();
 		setSize(800,400);
@@ -303,6 +315,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			_graph.getGraphRepresentation().updateModel();
 			if(_taskModel._tasks.length == 0) {
 				_taskModel = new ProjectSaveLoad().loadProject(f);
+				_taskModel.getUndoManager().setChangeListener(_undoRedoChangeListener);
 				_graph.setModel(_taskModel);
 				setFile(f);
 				updateActionsEnableState();
@@ -405,7 +418,6 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		menu.add(menuFile);
 		
 		JMenu menuEdit = new JMenu("Edit");
-		menuEdit.addMenuListener(new EditMenuListener());
 		menuEdit.add(_undoAction).setAccelerator(getAcceleratorStroke('Z'));
 		menuEdit.add(_redoAction).setAccelerator(getAcceleratorStroke('Y'));
 		menu.add(menuEdit);
@@ -659,14 +671,6 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		} else {
 			_redoAction.putValue(Action.NAME, "Redo");
 			_redoAction.setEnabled(false);
-		}
-	}
-
-	public class EditMenuListener implements MenuListener {
-		public void menuCanceled(MenuEvent arg0) {}
-		public void menuDeselected(MenuEvent arg0) {}
-		public void menuSelected(MenuEvent arg0) {
-			updateUndoRedoMenu();
 		}
 	}
 }

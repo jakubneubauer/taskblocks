@@ -22,7 +22,7 @@ package taskblocks.modelimpl;
 import taskblocks.graph.TaskModel;
 import taskblocks.utils.ArrayUtils;
 
-public class TaskModelImpl implements TaskModel{
+public class TaskModelImpl implements TaskModel {
 	
 	public TaskImpl[] _tasks;
 	public ManImpl[] _mans;
