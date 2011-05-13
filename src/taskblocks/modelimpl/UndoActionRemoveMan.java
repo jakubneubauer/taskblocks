@@ -10,22 +10,18 @@ public class UndoActionRemoveMan implements UndoAction {
 		_model = model;
 	}
 
-	@Override
 	public String getUndoLabel() {
 		return "remove man " + _man.getName();
 	}
 
-	@Override
 	public String getRedoLabel() {
 		return "remove man " + _man.getName();
 	}
 
-	@Override
 	public void undo() {
 		_model.addMan(_man);
 	}
 
-	@Override
 	public void redo() {
 		_model.removeManImpl(_man);
 	}

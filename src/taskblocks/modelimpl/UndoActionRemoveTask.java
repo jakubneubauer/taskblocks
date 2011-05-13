@@ -1,6 +1,5 @@
 package taskblocks.modelimpl;
 
-// FIXME: Nefunguje undo, kdyz byl smazany task napojeny na jiny task.
 public class UndoActionRemoveTask implements UndoAction {
 
 	TaskImpl _task;

@@ -263,7 +263,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	};
 	
 	ChangeListener _undoRedoChangeListener = new ChangeListener() {
-		@Override public void stateChanged(ChangeEvent e) {
+		public void stateChanged(ChangeEvent e) {
 			updateUndoRedoMenu();
 		}
 	};
