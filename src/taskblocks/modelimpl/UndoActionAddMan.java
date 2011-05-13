@@ -11,7 +11,12 @@ public class UndoActionAddMan implements UndoAction {
 	}
 
 	@Override
-	public String getLabel() {
+	public String getUndoLabel() {
+		return "add man " + _man.getName();
+	}
+
+	@Override
+	public String getRedoLabel() {
 		return "add man " + _man.getName();
 	}
 
@@ -25,4 +30,7 @@ public class UndoActionAddMan implements UndoAction {
 		_model.addMan(_man);
 	}
 
+	public String toString() {
+		return getUndoLabel();
+	}
 }

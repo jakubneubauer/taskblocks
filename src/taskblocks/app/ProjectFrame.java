@@ -63,6 +63,7 @@ import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskImpl;
 import taskblocks.modelimpl.TaskModelImpl;
 import taskblocks.modelimpl.TaskPainterImpl;
+import taskblocks.modelimpl.UndoActionManModify;
 import taskblocks.modelimpl.UndoActionTaskModify;
 import taskblocks.modelimpl.UndoManager;
 
@@ -634,10 +635,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 
 	private void configureMan(ManImpl man) {
 		_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+		ManImpl before = man.clone();
 		if(ManConfigDialog.openDialog(this, man, _taskModel, _graph, false)) {
 			_graph.setModel(_taskModel); // model -> GUI udate
 			_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 			_graph.repaint();
+			_taskModel.getUndoManager().addAction(new UndoActionManModify(_taskModel, before, man));
 		}
 	}
 
@@ -658,14 +661,22 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	private void updateUndoRedoMenu() {
 		final UndoManager um = _taskModel.getUndoManager();
 		if(um.canUndo()) {
-			_undoAction.putValue(Action.NAME, "Undo - " + um.getFirstUndoActionLabel());
+			String name = um.getFirstUndoActionLabel();
+			if(name.length() > 23) {
+				name = name.substring(0, 20) + "...";
+			}
+			_undoAction.putValue(Action.NAME, "Undo - " + name);
 			_undoAction.setEnabled(true);
 		} else {
 			_undoAction.putValue(Action.NAME, "Undo");
 			_undoAction.setEnabled(false);
 		}
 		if(um.canRedo()) {
-			_redoAction.putValue(Action.NAME, "Redo - " + um.getFirstRedoActionLabel());
+			String name = um.getFirstRedoActionLabel();
+			if(name.length() > 23) {
+				name = name.substring(0, 20) + "...";
+			}
+			_redoAction.putValue(Action.NAME, "Redo - " + name);
 			_redoAction.setEnabled(true);
 		} else {
 			_redoAction.putValue(Action.NAME, "Redo");

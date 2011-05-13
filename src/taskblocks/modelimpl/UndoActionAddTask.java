@@ -10,7 +10,11 @@ public class UndoActionAddTask implements UndoAction {
 		_task = t;
 	}
 	
-	public String getLabel() {
+	public String getUndoLabel() {
+		return "add task " + _task.getName();
+	}
+
+	public String getRedoLabel() {
 		return "add task " + _task.getName();
 	}
 
@@ -23,7 +27,6 @@ public class UndoActionAddTask implements UndoAction {
 	}
 	
 	public String toString() {
-		return getLabel();
+		return getUndoLabel();
 	}
-
 }

@@ -10,7 +10,10 @@ public class UndoActionRemoveTask implements UndoAction {
 		_model = model;
 		_task = t;
 	}
-	public String getLabel() {
+	public String getUndoLabel() {
+		return "remove task " + _task.getName();
+	}
+	public String getRedoLabel() {
 		return "remove task " + _task.getName();
 	}
 
@@ -23,6 +26,6 @@ public class UndoActionRemoveTask implements UndoAction {
 	}
 	
 	public String toString() {
-		return getLabel();
+		return getUndoLabel();
 	}
 }

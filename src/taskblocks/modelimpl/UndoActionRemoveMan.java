@@ -11,7 +11,12 @@ public class UndoActionRemoveMan implements UndoAction {
 	}
 
 	@Override
-	public String getLabel() {
+	public String getUndoLabel() {
+		return "remove man " + _man.getName();
+	}
+
+	@Override
+	public String getRedoLabel() {
 		return "remove man " + _man.getName();
 	}
 

@@ -31,18 +31,23 @@ public class UndoManager {
 		_group = null;
 	}
 	
-	private void addActionImpl(UndoAction a) {
-		_actions.add(_index, a);
-		_index++;
+	private void trimToIndex() {
 		if(_index < _actions.size()) {
 			_actions.subList(_index, _actions.size()).clear();
 		}
+	}
+	
+	private void addActionImpl(UndoAction a) {
+		_actions.add(_index, a);
+		_index++;
+		trimToIndex();
 		fireChange();
 	}
 	
 	public void addAction(UndoAction a) {
 		if(_group != null) {
 			_group.addAction(a);
+			trimToIndex();
 		} else {
 			addActionImpl(a);
 		}
@@ -78,18 +83,18 @@ public class UndoManager {
 	
 	public String getFirstUndoActionLabel() {
 		if(_group != null && !_group.isEmpty()) {
-			return _group.getLabel();
+			return _group.getUndoLabel();
 		}
 
 		if(_index > 0) {
-			return _actions.get(_index - 1).getLabel();
+			return _actions.get(_index - 1).getUndoLabel();
 		}
 		return null;
 	}
 	
 	public String getFirstRedoActionLabel() {
 		if(_index < _actions.size()) {
-			return _actions.get(_index).getLabel();
+			return _actions.get(_index).getRedoLabel();
 		}
 		return null;
 	}

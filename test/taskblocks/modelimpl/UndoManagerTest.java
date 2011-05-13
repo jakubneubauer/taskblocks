@@ -10,7 +10,8 @@ public class UndoManagerTest extends TestCase {
 	class UA implements UndoAction {
 		String name;
 		UA(String name) {this.name = name;}
-		@Override public String getLabel() {return name;}
+		@Override public String getUndoLabel() {return name;}
+		@Override public String getRedoLabel() {return name;}
 		@Override public void undo() {log.append("u" + name);}
 		@Override public void redo() {log.append("r" + name);}
 		@Override public String toString() { return name; }

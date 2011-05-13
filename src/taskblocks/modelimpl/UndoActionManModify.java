@@ -1,13 +1,13 @@
 package taskblocks.modelimpl;
 
-public class UndoActionTaskModify implements UndoAction {
-	
-	TaskImpl _before;
-	TaskImpl _after;
-	TaskImpl _origAfter;
+public class UndoActionManModify implements UndoAction {
+
+	ManImpl _before;
+	ManImpl _after;
+	ManImpl _origAfter;
 	TaskModelImpl _model;
 	
-	public UndoActionTaskModify(TaskModelImpl model, TaskImpl before, TaskImpl after) {
+	public UndoActionManModify(TaskModelImpl model, ManImpl before, ManImpl after) {
 		_before = before;
 		_after = after.clone();
 		_origAfter = after;
@@ -17,27 +17,27 @@ public class UndoActionTaskModify implements UndoAction {
 	public String getUndoLabel() {
 		return "change '" + _after.getName() + "'";
 	}
-
+	
 	public String getRedoLabel() {
 		return "change '" + _before.getName() + "'";
 	}
 
-	public void redo() {
-		for(Object t: _model.getTasks()) {
-			if(_origAfter == t) {
-				((TaskImpl)t).updateFrom(_after);
-			}
-		}
-	}
-
 	public void undo() {
-		for(Object t: _model.getTasks()) {
+		for(Object t: _model.getMans()) {
 			if(_origAfter == t) {
-				((TaskImpl)t).updateFrom(_before);
+				((ManImpl)t).updateFrom(_before);
 			}
 		}
 	}
 	
+	public void redo() {
+		for(Object t: _model.getMans()) {
+			if(_origAfter == t) {
+				((ManImpl)t).updateFrom(_after);
+			}
+		}
+	}
+
 	public String toString() {
 		return getUndoLabel();
 	}

@@ -15,9 +15,16 @@ public class UndoActionGroup implements UndoAction {
 	}
 	
 	// if only one task in group, returns it's name. Otherwise return the group name
-	public String getLabel() {
+	public String getUndoLabel() {
 		if(_actions.size() == 1) {
-			return _actions.get(0).getLabel();
+			return _actions.get(0).getUndoLabel();
+		}
+		return _name;
+	}
+
+	public String getRedoLabel() {
+		if(_actions.size() == 1) {
+			return _actions.get(0).getRedoLabel();
 		}
 		return _name;
 	}
@@ -48,6 +55,6 @@ public class UndoActionGroup implements UndoAction {
 	}
 	
 	public String toString() {
-		return getLabel();
+		return getUndoLabel();
 	}
 }
