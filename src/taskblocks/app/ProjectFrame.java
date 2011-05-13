@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
@@ -68,35 +67,6 @@ import taskblocks.modelimpl.UndoActionTaskModify;
 import taskblocks.modelimpl.UndoManager;
 
 public class ProjectFrame extends JFrame implements WindowListener, GraphActionListener {
-
-	
-	private void updateUndoRedoMenu() {
-		final UndoManager um = _taskModel.getUndoManager();
-		if(um.canUndo()) {
-			_undoAction.putValue(Action.NAME, "Undo " + um.getFirstUndoActionLabel());
-			_undoAction.setEnabled(true);
-		} else {
-			_undoAction.putValue(Action.NAME, "Undo");
-			_undoAction.setEnabled(false);
-		}
-		if(um.canRedo()) {
-			_redoAction.putValue(Action.NAME, "Redo " + um.getFirstRedoActionLabel());
-			_redoAction.setEnabled(true);
-		} else {
-			_redoAction.putValue(Action.NAME, "Redo");
-			_redoAction.setEnabled(false);
-		}
-	}
-	
-	public class EditMenuListener implements MenuListener {
-
-		public void menuCanceled(MenuEvent arg0) {}
-		public void menuDeselected(MenuEvent arg0) {}
-		public void menuSelected(MenuEvent arg0) {
-			updateUndoRedoMenu();
-		}
-
-	}
 
 	static int _numWindows;
 	static List<JMenuItem> _windowMenuItems = new ArrayList<JMenuItem>();
@@ -186,11 +156,15 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	MyAction _undoAction = new MyAction("Undo") {
 		public void actionPerformed(ActionEvent e) {
 			final UndoManager um = _taskModel.getUndoManager();
-			_graph.getGraphRepresentation().updateModel(); // GUI -> model update
-			um.undo();
-			_graph.setModel(_taskModel); // model -> GUI
-			_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
-			_graph.repaint();
+			// We try to update the action's "enabled" state after undo/redo, but
+			// if user changes tasks in GUI, the undo/redo action is not updated. So we must check here too.
+			if(um.canUndo()) {
+				_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+				um.undo();
+				_graph.setModel(_taskModel); // model -> GUI
+				_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
+				_graph.repaint();
+			}
 			updateUndoRedoMenu();
 		}
 	};
@@ -198,13 +172,17 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	MyAction _redoAction = new MyAction("Redo") {
 		public void actionPerformed(ActionEvent e) {
 			final UndoManager um = _taskModel.getUndoManager();
-			_graph.getGraphRepresentation().updateModel(); // GUI -> model update
-			um.redo();
-			_graph.setModel(_taskModel); // model -> GUI
-			_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
-			_graph.repaint();
+			// We try to update the action's "enabled" state after undo/redo, but
+			// if user changes tasks in GUI, the undo/redo action is not updated. So we must check here too.
+			if(um.canRedo()) {
+				_graph.getGraphRepresentation().updateModel(); // GUI -> model update
+				um.redo();
+				_graph.setModel(_taskModel); // model -> GUI
+				_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
+				_graph.repaint();
+			}
 			updateUndoRedoMenu();
-		}		
+		}
 	};
 
 	Action _saveAsAction = new MyAction("Save As...") {
@@ -664,5 +642,31 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		if(task != null && e.getClickCount() >= 2) {
 			configureTask((TaskImpl)task);
 		}
-	}	
+	}
+	
+	private void updateUndoRedoMenu() {
+		final UndoManager um = _taskModel.getUndoManager();
+		if(um.canUndo()) {
+			_undoAction.putValue(Action.NAME, "Undo - " + um.getFirstUndoActionLabel());
+			_undoAction.setEnabled(true);
+		} else {
+			_undoAction.putValue(Action.NAME, "Undo");
+			_undoAction.setEnabled(false);
+		}
+		if(um.canRedo()) {
+			_redoAction.putValue(Action.NAME, "Redo - " + um.getFirstRedoActionLabel());
+			_redoAction.setEnabled(true);
+		} else {
+			_redoAction.putValue(Action.NAME, "Redo");
+			_redoAction.setEnabled(false);
+		}
+	}
+
+	public class EditMenuListener implements MenuListener {
+		public void menuCanceled(MenuEvent arg0) {}
+		public void menuDeselected(MenuEvent arg0) {}
+		public void menuSelected(MenuEvent arg0) {
+			updateUndoRedoMenu();
+		}
+	}
 }

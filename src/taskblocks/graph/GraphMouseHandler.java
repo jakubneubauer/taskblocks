@@ -502,27 +502,32 @@ public class GraphMouseHandler implements MouseListener, MouseMotionListener, Mo
 	}
 
 	void deleteSelection() {
-		boolean changed = false;
-		for(Object o: _selection) {
-			if(o instanceof Connection) {
-				_graph._builder.removeConnection((Connection)o);
-				changed = true;
+		_graph._model.beginUpdateGroup("Delete");
+		try {
+			boolean changed = false;
+			for(Object o: _selection) {
+				if(o instanceof Connection) {
+					_graph._builder.removeConnection((Connection)o);
+					changed = true;
+				}
 			}
-		}
-		for(Object o: _selection) {
-			if(o instanceof Task) {
-				_graph._builder.removeTask((Task)o);
-				changed = true;
+			for(Object o: _selection) {
+				if(o instanceof Task) {
+					_graph._builder.removeTask((Task)o);
+					changed = true;
+				}
 			}
-		}
-		for(Object o: _selection) {
-			if(o instanceof TaskRow) {
-				_graph._builder.removeRow((TaskRow)o);
-				changed = true;
+			for(Object o: _selection) {
+				if(o instanceof TaskRow) {
+					_graph._builder.removeRow((TaskRow)o);
+					changed = true;
+				}
 			}
-		}
-		if(changed) {
-			_graph.repaint();
+			if(changed) {
+				_graph.repaint();
+			}
+		} finally {
+			_graph._model.endUpdateGroup();
 		}
 	}
 }

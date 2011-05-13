@@ -46,6 +46,16 @@ public class ArrayUtils {
 		newArray[array.length] = member;
 		return newArray;
 	}
+	
+	public static<T> boolean arrayContains(T[] array, T member) {
+		if(array == null) { return false; }
+		for(T m: array) {
+			if(m == member) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Finds member in array and if finds it, creates the same array without this member.
@@ -54,7 +64,7 @@ public class ArrayUtils {
 	 * @param member
 	 * @return new array without member or the old array if member wasn't found
 	 */
-	public static Object[] removeFromArray(Object[] array, Object member) {
+	public static<T> T[] removeFromArray(T[] array, T member) {
 		int i;
 		for(i = 0; i<array.length;i++) {
 			if(array[i] == member) {
@@ -63,7 +73,7 @@ public class ArrayUtils {
 		}
 		// if we found the listener, construct new arrray without it.
 		if(i < array.length) {
-			Object[] newArray = (Object[])Array.newInstance(array.getClass().getComponentType(), array.length - 1);
+			T[] newArray = (T[])Array.newInstance(array.getClass().getComponentType(), array.length - 1);
 			System.arraycopy(array, 0, newArray, 0, i);
 			System.arraycopy(array, i+1, newArray, i, array.length-i-1);
 			return newArray;

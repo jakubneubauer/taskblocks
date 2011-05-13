@@ -29,7 +29,7 @@ public class TaskImpl implements Cloneable {
 	private long _startTime;
 	private long _duration;
     private long _actualDuration;
-	private TaskImpl[] _predecessors;
+	private TaskImpl[] _predecessors = new TaskImpl[0];
 	private ManImpl _man;
 	private String _comment;
 	

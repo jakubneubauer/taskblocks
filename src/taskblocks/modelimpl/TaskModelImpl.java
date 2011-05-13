@@ -133,16 +133,36 @@ public class TaskModelImpl implements TaskModel{
 	}
 
 	public void removeMan(Object man) {
+		_undoManager.addAction(new UndoActionRemoveMan(this, (ManImpl)man));
+		removeManImpl(man);
+	}
+
+	public void removeManImpl(Object man) {
 		_mans = (ManImpl[])ArrayUtils.removeFromArray(_mans, man);
 	}
 
 	public void removeTask(Object task) {
-		removeTaskImpl(task);
 		_undoManager.addAction(new UndoActionRemoveTask(this, (TaskImpl)task));
+		for(TaskImpl t: _tasks) {
+			if(t == task) { continue; }
+			if(ArrayUtils.arrayContains(t.getPredecessors(), task)) {
+				TaskImpl prev = t.clone();
+				t.setPredecessors(ArrayUtils.removeFromArray(t.getPredecessors(), (TaskImpl)task));
+				_undoManager.addAction(new UndoActionTaskModify(this, prev, t));
+			}
+		}
+		removeTaskImpl(task);
 	}
 
 	public void removeTaskImpl(Object task) {
 		_tasks = (TaskImpl[])ArrayUtils.removeFromArray(_tasks, task);
+		for(TaskImpl t: _tasks) {
+			TaskImpl[] newPred = ArrayUtils.removeFromArray(t.getPredecessors(), t);
+			if(!ArrayUtils.arrayEqualsExceptNull(newPred, t.getPredecessors())) {
+				TaskImpl prev = t.clone();
+				t.setPredecessors(newPred);
+			}
+		}
 	}
 
 	public double getManWorkload(Object man) {

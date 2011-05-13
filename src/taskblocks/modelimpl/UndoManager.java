@@ -14,8 +14,7 @@ public class UndoManager {
 	}
 	
 	public void beginGroup(String name) {
-		System.out.println("begin group " + name);
-		trimAtIndex();
+		//System.out.println("begin group " + name);
 		if(_group != null && !_group.isEmpty()) {
 			addActionImpl(_group);
 		}
@@ -23,12 +22,12 @@ public class UndoManager {
 	}
 	
 	public void endGroup() {
-		System.out.println("end group");
+		//System.out.println("end group");
 		if(_group != null && !_group.isEmpty()) {
 			addActionImpl(_group);
 		}
 		_group = null;
-		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	private void trimAtIndex() {
@@ -44,13 +43,13 @@ public class UndoManager {
 	}
 	
 	public void addAction(UndoAction a) {
-		System.out.println("addAction");
+		//System.out.println("addAction");
 		if(_group != null) {
 			_group.addAction(a);
 		} else {
 			addActionImpl(a);
 		}
-		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public boolean canUndo() {
@@ -68,7 +67,7 @@ public class UndoManager {
 		}
 		_index--;
 		_actions.get(_index).undo();
-		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public void redo() {
@@ -78,7 +77,7 @@ public class UndoManager {
 		}
 		_index++;
 		_actions.get(_index-1).redo();
-		System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
+		//System.out.println("Idx: " + _index + ", queue: " + _actions + ", Group: " + (_group == null ? "null" : (_group._actions)));
 	}
 	
 	public String getFirstUndoActionLabel() {

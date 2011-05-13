@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import taskblocks.graph.TaskGraphComponent;
 import taskblocks.modelimpl.ManImpl;
 import taskblocks.modelimpl.TaskModelImpl;
+import taskblocks.modelimpl.UndoActionAddMan;
 
 public class ManConfigDialog extends ConfigDialogStub  {
 	
@@ -86,6 +87,8 @@ public class ManConfigDialog extends ConfigDialogStub  {
 		_graph.setModel(_model);
 		_graph.getGraphRepresentation().setDirty(); // the model->GUI resetted the dirty flag
 		_graph.repaint();
+
+		_model.getUndoManager().addAction(new UndoActionAddMan(_model, man));
 		
 		_cfgPanel.nameTF.setSelectionStart(0);
 		_cfgPanel.nameTF.setSelectionEnd(_cfgPanel.nameTF.getText().length());
