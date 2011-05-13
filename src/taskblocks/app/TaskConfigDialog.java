@@ -48,8 +48,8 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 	}
 
 	private void fillTask(TaskImpl task) {
-		task.setDuration(((Integer)_cfgPanel.planedSP.getValue()).intValue());
-		task.setActualDuration(((Integer)_cfgPanel.actualSP.getValue()).intValue());
+		task.setEffort(((Integer)_cfgPanel.planedEffortSP.getValue()).intValue());
+		task.setWorkedTime(((Integer)_cfgPanel.workedTimeSP.getValue()).intValue());
 		task.setName(_cfgPanel.nameTF.getText());
 		task.setBugId(_cfgPanel.bugIdTF.getText());
 		task.setMan(((ManImpl)_cfgPanel.manCB.getSelectedItem()));
@@ -73,7 +73,7 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 		long lastFinishTime = 0;
 		for(TaskImpl tmpTask: _model._tasks) {
 			if(t.getMan() == tmpTask.getMan()) {
-				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getDuration(), tmpTask.getWorkload());
+				long finish = Utils.countFinishTime(Utils.repairStartTime(tmpTask.geStartTime()), tmpTask.getEffort(), tmpTask.getWorkload());
 				finish = Utils.repairStartTime(finish);
 				if(lastFinishTime < finish) {
 					lastFinishTime = finish;
@@ -107,9 +107,9 @@ public class TaskConfigDialog extends ConfigDialogStub  {
 			_task = new TaskImpl();
 			_task.setPredecessors(new TaskImpl[0]);
 			_task.setMan(_model._mans[0]);
-			_task.setDuration(5);
-            _task.setActualDuration( 0 );
-            _task.setComment( "" );
+			_task.setEffort(5);
+            _task.setWorkedTime(0);
+            _task.setComment("");
 		} else {
 			setTitle("Task " + _task.getName());
 		}

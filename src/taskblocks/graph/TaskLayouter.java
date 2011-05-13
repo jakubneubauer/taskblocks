@@ -42,7 +42,7 @@ class TaskLayouter {
 		FontMetrics fm = g2.getFontMetrics();
 		int maxRowWidth = fm.stringWidth("Worker");
 		for (TaskRow row : _builder._rows) {
-			maxRowWidth = Math.max(maxRowWidth, fm.stringWidth(row._name));
+			maxRowWidth = Math.max(maxRowWidth, fm.stringWidth(row.getLabel()));
 		}
 		_graph._headerWidth = maxRowWidth + 20;
 		_graph.recountBounds();

@@ -168,7 +168,6 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		}
 		
 	    public void setEnabled(boolean enabled) {
-	    	System.out.println("Enabling UNDO: " + enabled);
 	    	super.setEnabled(enabled);
 	    }
 	};

@@ -100,7 +100,7 @@ public class TaskGraphRepresentation {
 				}
 				// task -> row mapping
 				t._row = row;
-				t.setDuration(_model.getTaskDuration(t._userObject), _model.getTaskActualDuration(t._userObject));
+				t.setEffort(_model.getTaskEffort(t._userObject), _model.getTaskWorkedTime(t._userObject));
 				t.setStartTime(_model.getTaskStartTime(t._userObject));
 				t.setComment( _model.getTaskComment(t._userObject) );
 				

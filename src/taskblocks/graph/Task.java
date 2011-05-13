@@ -42,18 +42,18 @@ class Task extends GraphObject {
 	Connection[] _outgoingConnections;
 	
 	/** How many working days the task takes */
-	private long _duration;
+	private long _effort;
 	
 	/**
 	 * How many working days the task takes
 	 * (Currently not displayed)
 	 */
-	private long _actualDuration;
+	private long _workedTime;
 	
 	/** When the task starts */
 	private long _startTime;
 	
-	/** Finish time (counted mathematically. So, for example 1 day task finishes at start-time + 1) . Is automatically counted from startTime and duration */
+	/** Finish time (counted mathematically. So, for example 1 day task finishes at StartTime + 1) . Is automatically counted from startTime and duration */
 	private long _finishTime;
 	
 	/** Finish time (counted for human. So, for example 1 day task finishes at the same day as it starts) */
@@ -88,7 +88,7 @@ class Task extends GraphObject {
 
 	/** Returns the netto duration of a task */
 	public long getEffort() {
-		return _duration;
+		return _effort;
 	}
 	
 	public long getDuration() {
@@ -99,7 +99,7 @@ class Task extends GraphObject {
 	 * Gets actual duration, which means how much was already done
 	 */
 	public long getActualDuration() {
-		return _actualDuration;
+		return _workedTime;
 	}
 
 	/**
@@ -108,24 +108,24 @@ class Task extends GraphObject {
 	 * @param duration The tasks duration
 	 * @param actual How much was already done.
 	 */
-	public void setDuration(long duration, long actual) {
-		long oldDuration = _duration;
-		this._duration = duration;
-		long oldActualDuration = _actualDuration;
-		this._actualDuration = actual;
-		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
+	public void setEffort(long duration, long actual) {
+		long oldDuration = _effort;
+		this._effort = duration;
+		long oldActualDuration = _workedTime;
+		this._workedTime = actual;
+		_finishTime = Utils.countFinishTime(_startTime, _effort, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
-		if( (oldDuration != _duration) || (oldActualDuration != _actualDuration) ){
+		if( (oldDuration != _effort) || (oldActualDuration != _workedTime) ){
 			_builder.setDirty();
 		}
 	}
 	
 	public void setEffort(long duration) {
-		long oldDuration = _duration;
-		this._duration = duration;
-		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
+		long oldDuration = _effort;
+		this._effort = duration;
+		_finishTime = Utils.countFinishTime(_startTime, _effort, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
-		if(oldDuration != _duration) {
+		if(oldDuration != _effort) {
 			_builder.setDirty();
 		}
 	}
@@ -145,7 +145,7 @@ class Task extends GraphObject {
 		long oldTime = _startTime;
 		_startTime = time;
 		repairStartTime();
-		_finishTime = Utils.countFinishTime(_startTime, _duration, getWorkload());
+		_finishTime = Utils.countFinishTime(_startTime, _effort, getWorkload());
 		_finishTimeForTooltip = _finishTime-1;
 		if(_startTime != oldTime) {
 			_builder.setDirty();

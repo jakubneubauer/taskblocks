@@ -83,9 +83,9 @@ public class ProjectSaveLoad {
 	// Id in Bugzilla, used when exporting to it.
 	public static final String BUGID_A = "bugid";
 	
-	TaskModelImpl _model; // NOPMD by jakub on 6.8.09 15:50
-	Map<String, TaskImpl> _taskIds; // NOPMD by jakub on 6.8.09 15:50
-	Map<String, ManImpl> _manIds; // NOPMD by jakub on 6.8.09 15:50
+	TaskModelImpl _model;
+	Map<String, TaskImpl> _taskIds;
+	Map<String, ManImpl> _manIds;
 	
 	public static final int CURRENT_VERSION = 1;
 
@@ -158,9 +158,9 @@ public class ProjectSaveLoad {
 					long taskDuration = xmlDurationToTaskDuration(taskE.getAttribute(DURATION_A));
 					
 					String usedStr = taskE.getAttribute(ACTUAL_A);
-					long taskUsed = 0;
+					long taskWorkedTime = 0;
 					if(usedStr != null && usedStr.trim().length() > 0) {
-						taskUsed = xmlDurationToTaskDuration(taskE.getAttribute(ACTUAL_A));
+						taskWorkedTime = xmlDurationToTaskDuration(taskE.getAttribute(ACTUAL_A));
 					}
 					String bugId = taskE.getAttribute(BUGID_A);
 					String colorTxt = taskE.getAttribute(COLOR_A);
@@ -179,8 +179,8 @@ public class ProjectSaveLoad {
 					TaskImpl task = new TaskImpl();
 					task.setName(taskName);
 					task.setStartTime(taskStart);
-					task.setDuration(taskDuration);
-					task.setActualDuration(taskUsed);
+					task.setEffort(taskDuration);
+					task.setWorkedTime(taskWorkedTime);
 					task.setMan(man);
 					task.setComment( comment );
 					task.setBugId(bugId);
@@ -352,9 +352,9 @@ public class ProjectSaveLoad {
 		taskE.setAttribute(NAME_A, t.getName());
 		taskE.setAttribute(ID_A, t._id);
 		taskE.setAttribute(START_A, taskTimeToXmlTime(t.getStartTime()));
-		taskE.setAttribute(DURATION_A, taskDurationToXmlDuration(t.getDuration()));
-		if(t.getActualDuration() != 0) {
-			taskE.setAttribute(ACTUAL_A, taskDurationToXmlDuration(t.getActualDuration()));
+		taskE.setAttribute(DURATION_A, taskDurationToXmlDuration(t.getEffort()));
+		if(t.getWorkedTime() != 0) {
+			taskE.setAttribute(ACTUAL_A, taskDurationToXmlDuration(t.getWorkedTime()));
 		}
 		taskE.setAttribute(MAN_A, t.getMan()._id);
 		taskE.setAttribute(COMM_A, t.getComment());

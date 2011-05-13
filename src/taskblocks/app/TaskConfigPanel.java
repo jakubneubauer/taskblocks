@@ -48,8 +48,8 @@ public class TaskConfigPanel extends JPanel {
 	JComboBox manCB;
 	JTextField nameTF;
 	JTextField bugIdTF;
-	JSpinner planedSP;
-	JSpinner actualSP;
+	JSpinner planedEffortSP;
+	JSpinner workedTimeSP;
 	JComboBox colorLabelCB;
 	JTextArea commentTA;
 	
@@ -67,9 +67,9 @@ public class TaskConfigPanel extends JPanel {
 		JLabel manL = new JLabel("Worker:");
 		manCB = new JComboBox(new DefaultComboBoxModel(_model._mans));
 		JLabel durationL = new JLabel("Effort (days):");
-		planedSP = new JSpinner(new SpinnerNumberModel((int)_task.getDuration(), 1, 365, 1));
+		planedEffortSP = new JSpinner(new SpinnerNumberModel((int)_task.getEffort(), 1, 365, 1));
 		//JLabel actualDurL = new JLabel("Actual Duration:");
-		actualSP = new JSpinner(new SpinnerNumberModel((int)_task.getActualDuration(), 0, 365, 1));
+		workedTimeSP = new JSpinner(new SpinnerNumberModel((int)_task.getWorkedTime(), 0, 365, 1));
 		JLabel colorL = new JLabel("Color Label:");
 		colorLabelCB = new JComboBox(new DefaultComboBoxModel(ColorLabel.COLOR_LABELS));
 		colorLabelCB.setRenderer(new ColorLabelRenderer(colorLabelCB.getRenderer()));
@@ -96,7 +96,7 @@ public class TaskConfigPanel extends JPanel {
 		//
 		contentP.add(nameL, gc);
 		gc.gridy++; contentP.add(durationL, gc);
-		// TODO: Actual Duration. For now disabled
+		// Actual Duration. For now disabled
 		//gc.gridy++; contentP.add(actualDurL, gc);
 		gc.gridy++; contentP.add(manL, gc);
 		gc.gridy++; contentP.add(colorL, gc);
@@ -112,8 +112,8 @@ public class TaskConfigPanel extends JPanel {
 		gc.insets.left = 8;
 		//
 		contentP.add(nameTF, gc);
-		gc.gridy++; contentP.add(planedSP, gc);
-		// TODO: Actual Duration. For now disabled
+		gc.gridy++; contentP.add(planedEffortSP, gc);
+		// Actual Duration. For now disabled
 		//gc.gridy++; contentP.add(actualSP, gc);
 		gc.gridy++; contentP.add(manCB, gc);
 		gc.gridy++; contentP.add(colorLabelCB, gc);

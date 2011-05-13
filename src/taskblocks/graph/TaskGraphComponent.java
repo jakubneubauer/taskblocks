@@ -642,6 +642,7 @@ public class TaskGraphComponent extends JComponent implements ComponentListener,
 			repaint();
 		}
 	}
+	
 	private void adjustScrolls() {
 		// helper variable
 		_adjustingScrolls = true;

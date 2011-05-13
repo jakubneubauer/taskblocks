@@ -57,7 +57,7 @@ public class TaskPainterImpl implements TaskGraphPainter {
 		}
 		g2.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 5, 5);
 
-// TODO: Actual Duration. For now disabled
+// Actual Duration. For now disabled
 //		// percentage of actual duration/planned duration:
 //		int right = bounds.x + (int)((bounds.width+4) * percentage)-5;
 //		g2.setColor(_taskBorderCol);
@@ -89,7 +89,7 @@ public class TaskPainterImpl implements TaskGraphPainter {
 			g2.drawRoundRect(bounds.x+3, bounds.y+6, bounds.width-7, bounds.height-6, 5, 5);
 		}
 		g2.setColor(Color.black);
-		g2.drawString(((ManImpl)man).getName(), bounds.x + 8, bounds.y + (bounds.height + g2.getFontMetrics().getHeight())/2);
+		g2.drawString(((ManImpl)man).getLabel(), bounds.x + 8, bounds.y + (bounds.height + g2.getFontMetrics().getHeight())/2);
 	}
 
 }

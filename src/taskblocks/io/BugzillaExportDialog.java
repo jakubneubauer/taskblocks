@@ -408,7 +408,7 @@ public class BugzillaExportDialog extends JDialog {
 			// not the day after (mathematically)
 			
 			long endTime = (Utils.countFinishTime(task.getStartTime(), task
-					.getDuration(), task.getWorkload()) -1) * Utils.MILLISECONDS_PER_DAY;
+					.getEffort(), task.getWorkload()) -1) * Utils.MILLISECONDS_PER_DAY;
 			_tasksData[i] = new Object[COL_NAMES.length];
 			_tasksData[i][INDEX_ENABLED] = Boolean.valueOf(true);
 			if(_tasks[i].getBugId() != null) {
@@ -423,9 +423,9 @@ public class BugzillaExportDialog extends JDialog {
 			_tasksData[i][INDEX_NAME] = task.getName();
 			_tasksData[i][INDEX_MAN] = task.getMan().getName();
 			_tasksData[i][INDEX_HOURS] = Integer.valueOf(
-					(int) ((double) task.getDuration() * 8d));
+					(int) ((double) task.getEffort() * 8d));
 			_tasksData[i][INDEX_REMAINS] = Integer.valueOf(
-					(int) ((double) (task.getDuration()-task.getActualDuration()) * 8d));
+					(int) ((double) (task.getEffort()-task.getWorkedTime()) * 8d));
 			if(((Integer)_tasksData[i][INDEX_REMAINS]) < 0) {
 				_tasksData[i][INDEX_REMAINS] = 0;
 			}

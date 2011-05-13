@@ -38,12 +38,12 @@ public class TaskModelImpl implements TaskModel {
 		return _undoManager;
 	}
 
-	public long getTaskDuration(Object task) {
-		return ((TaskImpl)task).getDuration();
+	public long getTaskEffort(Object task) {
+		return ((TaskImpl)task).getEffort();
 	}
 	
-	public long getTaskActualDuration(Object task) {
-		return ((TaskImpl)task).getActualDuration();
+	public long getTaskWorkedTime(Object task) {
+		return ((TaskImpl)task).getWorkedTime();
 	}
 
 	public Object getTaskMan(Object task) {
@@ -74,7 +74,7 @@ public class TaskModelImpl implements TaskModel {
 		return new TaskModelImpl(new TaskImpl[0], new ManImpl[0]);
 	}
 
-	public void updateTask(Object task, Object taskMan, long startTime, long duration, long actualDuration, Object[] precedingTasks) {
+	public void updateTask(Object task, Object taskMan, long startTime, long effort, long workedTime, Object[] precedingTasks) {
 		TaskImpl prev = null;
 		TaskImpl t = (TaskImpl)task;
 		if(t.getMan() != taskMan) {
@@ -89,17 +89,17 @@ public class TaskModelImpl implements TaskModel {
 			}
 			t.setStartTime(startTime);
 		}
-		if(t.getDuration() != duration) {
+		if(t.getEffort() != effort) {
 			if(prev == null) {
 				prev = t.clone();
 			}
-			t.setDuration(duration);
+			t.setEffort(effort);
 		}
-		if(t.getActualDuration() != actualDuration) {
+		if(t.getWorkedTime() != workedTime) {
 			if(prev == null) {
 				prev = t.clone();
 			}
-			t.setActualDuration( actualDuration );
+			t.setWorkedTime( workedTime );
 		}
 		if(!ArrayUtils.arrayEqualsExceptNull(precedingTasks, t.getPredecessors())) {
 			if(prev == null) {

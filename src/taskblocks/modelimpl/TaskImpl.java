@@ -27,8 +27,8 @@ public class TaskImpl implements Cloneable {
 	
 	private String _name;
 	private long _startTime;
-	private long _duration;
-    private long _actualDuration;
+	private long _effort;
+    private long _workedTime;
 	private TaskImpl[] _predecessors = new TaskImpl[0];
 	private ManImpl _man;
 	private String _comment;
@@ -55,54 +55,63 @@ public class TaskImpl implements Cloneable {
 		_name = t._name;
 		_bugId = t._bugId;
 		_startTime = t._startTime;
-		_duration = t._duration;
-		_actualDuration = t._actualDuration;
+		_effort = t._effort;
+		_workedTime = t._workedTime;
 		_predecessors = t._predecessors;
 		_man = t._man;
 		_comment = t._comment;
 		_colorLabel = t._colorLabel;
 	}
 	
-	public long getDuration() {
-		return _duration;
+	public long getEffort() {
+		return _effort;
 	}
-	public void setDuration(long _duration) {
-		if(_duration < 1) {
-			_duration = 1;
+	public void setEffort(long effort) {
+		if(effort < 1) {
+			effort = 1;
 		}
-		this._duration = _duration;
+		this._effort = effort;
 	}
     
-	public long getActualDuration() {
-		return _actualDuration;
+	public long getWorkedTime() {
+		return _workedTime;
 	}
-	public void setActualDuration(long _used) {
-		if(_used < 0) {
-			_used = 0;
+	
+	public void setWorkedTime(long workedTime) {
+		if(workedTime < 0) {
+			workedTime = 0;
 		}
-		this._actualDuration = _used;
+		this._workedTime = workedTime;
 	}
+	
 	public String getName() {
 		return _name;
 	}
+	
 	public void setName(String _name) {
 		this._name = _name;
 	}
+	
 	public long geStartTime() {
 		return _startTime;
 	}
+	
 	public void setStartTime(long time) {
 		_startTime = time;
 	}
+	
 	public long getStartTime() {
 		return _startTime;
 	}
+	
 	public TaskImpl[] getPredecessors() {
 		return _predecessors;
 	}
+	
 	public void setPredecessors(TaskImpl[] preds) {
 		_predecessors = preds;
 	}
+	
 	public void setMan(ManImpl man) {
 		_man = man;
 	}

@@ -54,4 +54,12 @@ class TaskRow extends GraphObject {
 	public String toString() {
 		return _name;
 	}
+	
+	public String getLabel() {
+		if(_workload == 1.0) {
+			return _name;
+		} else {
+			return _name + " (" + ((int)(_workload * 100.0)) + "%)";
+		}
+	}
 }
