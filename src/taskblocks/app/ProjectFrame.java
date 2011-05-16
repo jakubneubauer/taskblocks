@@ -31,6 +31,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
@@ -75,7 +77,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	TaskModelImpl _taskModel;
 	TaskGraphComponent _graph;
 	
-	File _file;
+	URL _file;
 	boolean _newCleanProject;
 	JCheckBoxMenuItem _myWindowMenuItem;
 	
@@ -190,7 +192,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 
 	Action _saveAsAction = new MyAction("Save As...") {
 		public void actionPerformed(ActionEvent e) {
-			File oldFile = _file;
+			URL oldFile = _file;
 			_file = null;
 			if(!save()) {
 				_file = oldFile;
@@ -279,12 +281,12 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 		updateUndoRedoMenu();
 	}
 	
-	public ProjectFrame(File f) throws WrongDataException {
-		this(new ProjectSaveLoad().loadProject(f));
-		setFile(f);
-		updateActionsEnableState();
-		updateUndoRedoMenu();
-	}
+//	public ProjectFrame(File f) throws WrongDataException {
+//		this(new ProjectSaveLoad().loadProject(f));
+//		setFile(f);
+//		updateActionsEnableState();
+//		updateUndoRedoMenu();
+//	}
 	
 	private ProjectFrame(TaskModelImpl model) {
 		// there are some issues with transparent icon in frame, so we use icon
@@ -311,18 +313,26 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	 */
 	public void openFile(File f) {
 		try {
+			openURL(f.toURI().toURL());
+		} catch (MalformedURLException e) {
+			// NEVER GET HERE
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void openURL(URL url) {
+		try {
 			// check if the project is empty
 			_graph.getGraphRepresentation().updateModel();
 			if(_taskModel._tasks.length == 0) {
-				_taskModel = new ProjectSaveLoad().loadProject(f);
+				_taskModel = new ProjectSaveLoad().loadProject(url);
 				_taskModel.getUndoManager().setChangeListener(_undoRedoChangeListener);
 				_graph.setModel(_taskModel);
-				setFile(f);
+				setFile(url);
 				updateActionsEnableState();
 			} else {
-				new ProjectFrame(f);
+				new ProjectFrame().openURL(url);
 			}
-			
 		} catch (WrongDataException e) {
 			JOptionPane.showMessageDialog(null, "<html><b>Couldn't Open File</b><br><br><font size=\"-2\">" + e.getMessage() + "<br><br>");
 		} catch(Exception e) {
@@ -533,11 +543,34 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 	private KeyStroke getAcceleratorStroke(int keyCode) {
 		return KeyStroke.getKeyStroke(keyCode, 0);
 	}
+	
+	private void setFile(URL url) {
+		_file = url;
+		setTitle(getShortName(_file));
+		// TODO: 
+		//addToRecentFiles(f);
+	}
 		
 	private void setFile(File f) {
-		_file = f;
-		setTitle(_file.getName());
+		try {
+			_file = f.toURI().toURL();
+		} catch (MalformedURLException e) {
+			// NEVER GET HERE
+			throw new RuntimeException(e);
+		}
+		setTitle(f.getName());
 		addToRecentFiles(f);
+	}
+	
+	private String getShortName(URL url) {
+		if(url == null) { return null; }
+		String path = url.getPath();
+		if(path == null) { return null; }
+		int idx = path.lastIndexOf("/");
+		if(idx >= 0) {
+			return path.substring(idx+1);
+		}
+		return path;
 	}
 
 	private void tryClose() {
@@ -557,7 +590,7 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 			JLabel l = new JLabel("<html><b>Do you want to save changes to this document<br>before closing?</b><br><br><font size=\"-2\">If you don't save, your changes will be lost.<br></font><br>");
 			l.setFont(l.getFont().deriveFont(Font.PLAIN));
 			JOptionPane op = new JOptionPane(l, JOptionPane.QUESTION_MESSAGE, 0, null, options);
-			op.createDialog(this, _file == null ? "Unsaved project" : _file.getName()).setVisible(true);
+			op.createDialog(this, _file == null ? "Unsaved project" : getShortName(_file)).setVisible(true);
 			op.setInitialSelectionValue(CANCEL);
 			Object choice = op.getValue();
 			if(choice == null) {
@@ -590,34 +623,36 @@ public class ProjectFrame extends JFrame implements WindowListener, GraphActionL
 
 	private boolean save() {
 		_graph.getGraphRepresentation().updateModel();
-		File f = _file;
-		if(f == null) {
-			
-			// ask for file
-			if(TaskBlocks.RUNNING_ON_MAC || TaskBlocks.RUNNING_ON_WINDOWS) {
-				// MacOS user feeling
-				FileDialog fd = new FileDialog(ProjectFrame.this, "Save", FileDialog.SAVE);
-				fd.setVisible(true);
-				if(fd.getFile() != null) {
-					f = new File(fd.getDirectory(), fd.getFile());
+		
+		try {
+			URL f = _file;
+			if(f == null) {
+				// ask for file
+				if(TaskBlocks.RUNNING_ON_MAC || TaskBlocks.RUNNING_ON_WINDOWS) {
+					// MacOS user feeling
+					FileDialog fd = new FileDialog(ProjectFrame.this, "Save", FileDialog.SAVE);
+					fd.setVisible(true);
+					if(fd.getFile() != null) {
+						File f2 = new File(fd.getDirectory(), fd.getFile());
+						if(f2 != null) { f = f2.toURI().toURL();}
+					}
+				} else {
+					JFileChooser fc = new JFileChooser();
+					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					fc.showSaveDialog(ProjectFrame.this);
+					File file = fc.getSelectedFile();
+					if(file != null) {f = file.toURI().toURL();}
 				}
-			} else {
-				JFileChooser fc = new JFileChooser();
-				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				fc.showSaveDialog(ProjectFrame.this);
-				f = fc.getSelectedFile();
 			}
-		}
-		if(f != null) {
-			try {
+			if(f != null) {
 				new ProjectSaveLoad().saveProject(f, _taskModel);
 				setFile(f);
 				_graph.getGraphRepresentation().clearSaveDirtyFlag();
 				return true;
-			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(null, "<html><b>Couldn't Save</b><br><br><font size=\"-2\">" + e1.getMessage() + "<br><br>");
-				e1.printStackTrace();
 			}
+		} catch (Exception e1) {
+			JOptionPane.showMessageDialog(null, "<html><b>Couldn't Save</b><br><br><font size=\"-2\">" + e1.getMessage() + "<br><br>");
+			e1.printStackTrace();
 		}
 		return false;
 	}

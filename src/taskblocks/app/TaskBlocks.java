@@ -20,6 +20,7 @@
 package taskblocks.app;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -44,7 +45,16 @@ public class TaskBlocks {
 			public void run() {
 				if (args.length > 0) {
 					for (int i = 0; i < args.length; i++) {
-						new ProjectFrame().openFile(new File(args[i]));
+						File f = new File(args[i]);
+						if(f.isFile()) {
+							new ProjectFrame().openFile(new File(args[i]));
+						} else {
+							try {
+								new ProjectFrame().openURL(new URL(args[i]));
+							} catch (MalformedURLException e) {
+								e.printStackTrace();
+							}
+						}
 					}
 				} else {
 					new ProjectFrame();

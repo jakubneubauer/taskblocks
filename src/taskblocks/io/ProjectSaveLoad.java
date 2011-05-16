@@ -19,8 +19,16 @@
 
 package taskblocks.io;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -97,11 +105,13 @@ public class ProjectSaveLoad {
 	 * @return
 	 * @throws WrongDataException
 	 */
-	public TaskModelImpl loadProject(File f) throws WrongDataException {
+	public TaskModelImpl loadProject(URL f) throws WrongDataException {
+		InputStream input = null;
 		try {
+			input = f.openStream();
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			Document doc;
-			doc = dbf.newDocumentBuilder().parse(f);
+			doc = dbf.newDocumentBuilder().parse(input);
 			Element rootE = doc.getDocumentElement();
 			if(!TASKMAN_E.equals(rootE.getNodeName())) {
 				throw new WrongDataException("Document is not TaskBlocks project");
@@ -231,9 +241,62 @@ public class ProjectSaveLoad {
 			throw new WrongDataException("Can't read file: " + e.getMessage(), e);
 		} catch (ParserConfigurationException e) {
 			throw new WrongDataException("Document is not TaskBlocks project", e);
+		} finally {
+			if(input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					throw new WrongDataException("Cannot close input stream: " + e.toString());
+				}
+			}
 		}
 	}
 	
+
+	public void saveProject(URL url, TaskModelImpl model) throws TransformerException, ParserConfigurationException, IOException {
+		if("file".equals(url.getProtocol())) {
+			File f;
+			try {
+			  f = new File(url.toURI());
+			} catch(URISyntaxException e) {
+			  f = new File(url.getPath());
+			}
+			saveProject(f, model);
+		} else if("http".equals(url.getProtocol())) {
+			
+			ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+			saveProject(tmp, model);
+			
+			OutputStream out = null;
+			HttpURLConnection con = null;
+			try {
+				
+				con = (HttpURLConnection) url.openConnection();
+				con.setDoOutput(true);
+				//con.setDoInput(false);
+				con.setRequestMethod("PUT");
+				con.setRequestProperty("Content-Length", String.valueOf(tmp.size()));
+				con.setRequestProperty("Content-Type", "application/xml");
+				con.connect();
+				out = con.getOutputStream();
+				out.write(tmp.toByteArray());
+				int responseCode = con.getResponseCode();
+				if(responseCode != 200) {
+					throw new IOException("HTTP Error " + responseCode + ": " + con.getResponseMessage());
+				}
+			} finally {
+				if(out != null) {
+					out.close();
+				}
+				if(con != null) {
+					con.disconnect();
+				}
+			}
+		} else {
+			throw new IOException("Unsupported url protocol: " + url.getProtocol());
+		}
+	}
+
 	/**
 	 * Saves project to specified file
 	 * 
@@ -241,8 +304,18 @@ public class ProjectSaveLoad {
 	 * @param model
 	 * @throws TransformerException
 	 * @throws ParserConfigurationException
+	 * @throws IOException 
 	 */
-	public void saveProject(File f, TaskModelImpl model) throws TransformerException, ParserConfigurationException {
+	public void saveProject(File f, TaskModelImpl model) throws TransformerException, ParserConfigurationException, IOException {
+		FileOutputStream fos = new FileOutputStream(f);
+		try {
+			saveProject(fos, model);
+		} finally {
+			fos.close();
+		}
+	}
+	
+	public void saveProject(OutputStream out, TaskModelImpl model) throws TransformerException, ParserConfigurationException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		Document doc;
 		doc = dbf.newDocumentBuilder().newDocument();
@@ -257,7 +330,7 @@ public class ProjectSaveLoad {
 
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer t = tf.newTransformer();
-		t.transform(new DOMSource(doc), new StreamResult(f));
+		t.transform(new DOMSource(doc), new StreamResult(out));
 	}
 	
 	private void saveProject(Document doc) {
