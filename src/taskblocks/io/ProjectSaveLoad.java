@@ -19,7 +19,6 @@
 
 package taskblocks.io;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -82,6 +80,7 @@ public class ProjectSaveLoad {
 	public static final String WORKLOAD_A = "workload";
 	public static final String ID_A = "id";
 	public static final String START_A = "start";
+	public static final String END_A = "end";
 	public static final String DURATION_A = "duration";
 	public static final String ACTUAL_A = "actualDuration";
 	public static final String MAN_A = "man";
@@ -164,8 +163,33 @@ public class ProjectSaveLoad {
 				for(Element taskE: Utils.getChilds(tasksE, TASK_E)) {
 					String taskId = taskE.getAttribute(ID_A);
 					String taskName = taskE.getAttribute(NAME_A);
+					String taskManId = taskE.getAttribute(MAN_A);
+					ManImpl man = mans.get(taskManId); // mans are already loaded
+					if(man == null) {
+						throw new WrongDataException("Task with id " + taskId + " is not assigned to any man");
+					}
+					
 					long taskStart = xmlTimeToTaskTime(taskE.getAttribute(START_A));
-					long taskDuration = xmlDurationToTaskDuration(taskE.getAttribute(DURATION_A));
+					String durAttr = taskE.getAttribute(DURATION_A);
+					long taskEffort;
+					if(durAttr != null && durAttr.trim().length() > 0) {
+						taskEffort = xmlDurationToTaskDuration(durAttr);
+					} else {
+						String endAttr = taskE.getAttribute(END_A);
+						long taskEnd = xmlTimeToTaskTime(endAttr);
+
+						// start with effort=1. Increase it until the real duration is over
+						for(long newEffort = 2; true; newEffort++) {
+							long tmpEndTime = Utils.countFinishTime(taskStart, newEffort, man.getWorkload());
+							// Note: we compare to (taskEnd+1), since the tasks start/end are counted mathematically. For example task with
+							// duration 1 day starting on 2011-01-01 ends on 2011-01-02 (the second day)
+							if(tmpEndTime > (taskEnd+1)) {
+								// we are over, step back
+								taskEffort = newEffort-1;
+								break;
+							}
+						}
+					}
 					
 					String usedStr = taskE.getAttribute(ACTUAL_A);
 					long taskWorkedTime = 0;
@@ -175,12 +199,6 @@ public class ProjectSaveLoad {
 					String bugId = taskE.getAttribute(BUGID_A);
 					String colorTxt = taskE.getAttribute(COLOR_A);
 					String comment = taskE.getAttribute(COMM_A);
-					String taskManId = taskE.getAttribute(MAN_A);
-					ManImpl man = mans.get(taskManId); // mans are already loaded
-					
-					if(man == null) {
-						throw new WrongDataException("Task with id " + taskId + " is not assigned to any man");
-					}
 					
 					if(bugId != null && bugId.length() == 0) {
 						bugId = null;
@@ -189,7 +207,7 @@ public class ProjectSaveLoad {
 					TaskImpl task = new TaskImpl();
 					task.setName(taskName);
 					task.setStartTime(taskStart);
-					task.setEffort(taskDuration);
+					task.setEffort(taskEffort);
 					task.setWorkedTime(taskWorkedTime);
 					task.setMan(man);
 					task.setComment( comment );
