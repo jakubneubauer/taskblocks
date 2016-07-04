@@ -1,7 +1,3 @@
-
-TaskBlocks README
-=================
-
 What is it
 ----------
 TaskBlocks is simple application to help planning tasks. From version 0.5 it
