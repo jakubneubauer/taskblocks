@@ -7,43 +7,23 @@ supports also exporting tasks as Bugzilla bugs.
 
 Installation
 ------------
-You need Java 5.0 or higher installed to run TaskBlocks. So, if you don't
-have it, install it first, for example from <http://java.sun.com>. Mac OS X users
-need to update their 10.x system, which will install Java 5.0.
+Pre requisities: You need Java 5.0 or higher installed to run TaskBlocks. You can get it from <http://java.com>.
 
-Having Java 5.0 or higher installed, just download the latest taskblocks.jar
-file (or Mac users the .dmg file).
+Download the latest version from here:
 
-  * Windows users should be able to run it double-clicking on the downloaded
-        taskblocks.jar file. If it doesn't work, try to run from a commandline:
+https://code.google.com/archive/p/taskblocks/downloads
 
-        java -jar PATH_TO_JAR_FILE
+  * Windows users download and run the .exe file.
 
-        If it still doesn't work, ask your personal IT guru for help ;-)
-
-  * Linux and other-platforms users probably have to run the application from
-	    commandline like we have just described. Maybe double-clicking will
-        work on some installations
+  * Linux and other users run `java taskblocks.jar` from commandline
 
   * MacOS X users can download the .dmg package and install it in obvious way -
         double-clicking the .dmg file and dragging the application icon to your
         Applications folder.
 
-Usage
------
-The application interface should be so intuitive, that no further manual should
-be needed ;-) If you find something not easilly understandable, you can write
-to the autor. Your comments are welcome.
-
-Building from source
---------------------
-To build the application from source, you need to download the source package,
-and java compiler. The best way is to run ant. If you don't have it, just
-compile the sources in usual way. There are no other libraries dependencies.
-
 Project web
 -----------
-http://taskblocks.googlecode.com
+https://github.com/jakubneubauer/taskblocks
 
 License
 -------
