@@ -7,6 +7,8 @@ What is it
 TaskBlocks is simple application to help planning tasks. From version 0.5 it
 supports also exporting tasks as Bugzilla bugs.
 
+![screenshot](https://raw.githubusercontent.com/jakubneubauer/taskblocks/master/web/img/taskblocks1.png)
+
 Installation
 ------------
 You need Java 5.0 or higher installed to run TaskBlocks. So, if you don't
