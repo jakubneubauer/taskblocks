@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Task Blocks
+Comment=Task planning application
+Exec=/usr/bin/taskblocks
+Icon=/usr/share/doc/taskblocks/taskblocks64.ico
+Terminal=false
+Type=Application
+Categories=GNOME;Application;Office
+StartupNotify=true

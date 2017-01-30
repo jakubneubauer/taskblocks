@@ -7,67 +7,84 @@
 <project name="Task Blocks" default="jar">
   <description>Build file for Task Blocks application</description>
   
-  <property name="appVersion" value="0.9 Pre"/>
+  <property name="appVersion" value="0.9-preview"/>
   <property name="webCodeBase" value="http://jakubpc/~jakub/taskblocks/"/>
-	
+    
 
   <property name="appJar" value="taskblocks.jar"/>
   <property name="appJarVersioned" value="taskblocks-${appVersion}.jar"/>
   <property name="macAppDir" value="distr/MacOS/taskblocks-${appVersion}"/>
+  <property name="debAppDir" value="distr/deb/taskblocks-${appVersion}"/>
   <property name ="tarDir" value="taskblocks-${appVersion}"/>
 
 
 <!-- obsolete
   <target name="archive" depends="clean">
-  	<copy todir="${tarDir}">
-  		<fileset dir=".">
-  			<include name="src/**/*"/>
-  			<include name="lib/**/*"/>
-  			<include name="build.xml"/>
-  			<exclude name="lib/junit.jar"/>
-  		</fileset>
-  	</copy>
-  	<tar destfile="${tarDir}.tgz" compression="gzip" basedir="." includes="${tarDir}/**/*"></tar>
-  	<delete dir="${tarDir}"/>
+      <copy todir="${tarDir}">
+          <fileset dir=".">
+              <include name="src/**/*"/>
+              <include name="lib/**/*"/>
+              <include name="build.xml"/>
+              <exclude name="lib/junit.jar"/>
+          </fileset>
+      </copy>
+      <tar destfile="${tarDir}.tgz" compression="gzip" basedir="." includes="${tarDir}/**/*"></tar>
+      <delete dir="${tarDir}"/>
   </target>
-	
+    
   <target name="web" depends="distr">
     <exec executable="make" dir="web">
       <env key="CURRENT_VERSION" value="${appVersion}">
       </env>
       <arg value="-e"/>
     </exec>
-  	<mkdir dir="web/builds"/>
-  	<copy todir="web/builds/${appVersion}/other" file="${appJar}"/>
-  	<copy todir="web/builds/${appVersion}/MacOSX" file="${macAppDir}.dmg"/>
-  	<copy todir="web" file="lib/taskblocks.jnlp"/>
-  	<replace file="web/taskblocks.jnlp" token="APPVERSION" value="${appVersion}"/>
-  	<replace file="web/taskblocks.jnlp" token="CODEBASE" value="${webCodeBase}"/>
+      <mkdir dir="web/builds"/>
+      <copy todir="web/builds/${appVersion}/other" file="${appJar}"/>
+      <copy todir="web/builds/${appVersion}/MacOSX" file="${macAppDir}.dmg"/>
+      <copy todir="web" file="lib/taskblocks.jnlp"/>
+      <replace file="web/taskblocks.jnlp" token="APPVERSION" value="${appVersion}"/>
+      <replace file="web/taskblocks.jnlp" token="CODEBASE" value="${webCodeBase}"/>
   </target>
 -->
-  	
+      
   <target name="distr" depends="jar" description="Makes the distribution">
     <mkdir dir="distr"/>
-  	
-  	<!-- Create Mac OS X .dmg -->
-    <mkdir dir="${macAppDir}"/>
-  	<copy todir="${macAppDir}">
-  		<fileset dir="lib/apptemplate">
-  			<include name="TaskBlocks.app/**/*"/>
-  		</fileset>
-  	</copy>
-  	<replace file="${macAppDir}/TaskBlocks.app/Contents/Info.plist" token="APPVERSION" value="${appVersion}"/>
-  	<chmod perm="a+x" file="${macAppDir}/TaskBlocks.app/Contents/MacOS/TaskBlocks"></chmod>
-    <copy file="${appJar}" todir="${macAppDir}/TaskBlocks.app/Contents/Resources/Java"/>
-  	<delete file="${macAppDir}.dmg"/>
-  	<exec executable="hdiutil">
-  	  <arg value="create"/>
-  	  <arg value ="-srcfolder"/>
-  	  <arg value="${macAppDir}"/>
-  	  <arg value="${macAppDir}.dmg"/>
-  	</exec>
+      
+    <!-- Create debian .deb file -->
+    <mkdir dir="${debAppDir}"/>
+    <copy todir="${debAppDir}">
+        <fileset dir="lib/deb/taskblocks">
+            <include name="**/*"/>
+        </fileset>
+    </copy>
+    <replace file="${debAppDir}/DEBIAN/control" token="APPVERSION" value="${appVersion}"/>
+    <chmod perm="a+x" file="${debAppDir}/usr/bin/taskblocks"></chmod>
+    <copy file="${appJar}" todir="${debAppDir}/usr/lib/taskblocks"/>
+    <exec executable="fakeroot">
+      <arg value="dpkg" />
+      <arg value="--build" />
+      <arg value="${debAppDir}" />
+    </exec>
 
-  	<!-- Create versioned .jar file for other platforms -->
+    <!-- Create Mac OS X .dmg -->
+    <mkdir dir="${macAppDir}"/>
+      <copy todir="${macAppDir}">
+          <fileset dir="lib/apptemplate">
+              <include name="TaskBlocks.app/**/*"/>
+          </fileset>
+      </copy>
+      <replace file="${macAppDir}/TaskBlocks.app/Contents/Info.plist" token="APPVERSION" value="${appVersion}"/>
+      <chmod perm="a+x" file="${macAppDir}/TaskBlocks.app/Contents/MacOS/TaskBlocks"></chmod>
+      <copy file="${appJar}" todir="${macAppDir}/TaskBlocks.app/Contents/Resources/Java"/>
+      <delete file="${macAppDir}.dmg"/>
+      <exec executable="hdiutil">
+        <arg value="create"/>
+        <arg value ="-srcfolder"/>
+        <arg value="${macAppDir}"/>
+        <arg value="${macAppDir}.dmg"/>
+      </exec>
+
+    <!-- Create versioned .jar file for other platforms -->
     <copy file="${appJar}" tofile="distr/other/${appJarVersioned}"/>
   </target>
 
@@ -76,7 +93,7 @@
       <fileset dir="src"><include name="**/*.png"/></fileset>
       <fileset dir="src"><include name="**/*.gif"/></fileset>
     </copy>
-  	<echo message="${appVersion}" file="bin/taskblocks/version"/>
+      <echo message="${appVersion}" file="bin/taskblocks/version"/>
     <jar basedir="bin" destfile="${appJar}">
       <manifest>
         <attribute name="Created-By" value="Jakub Neubauer"/>
@@ -96,10 +113,10 @@
     <delete dir="bin"/>
     <delete dir="distr"/>
     <delete file="${appJar}"/>
-  	<!--
-  	<delete dir="web/builds"/>
-  	<delete file="web/taskblocks.jnlp"/>
-  	<delete dir="${tarDir}"/>
+      <!--
+      <delete dir="web/builds"/>
+      <delete file="web/taskblocks.jnlp"/>
+      <delete dir="${tarDir}"/>
     <delete file="${tarDir}.tgz"/>
     <exec executable="make" dir="web">
       <arg value="clean"/>

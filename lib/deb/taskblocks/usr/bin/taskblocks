@@ -1,0 +1,16 @@
+#!/bin/sh
+
+TB_JARFILE=/usr/lib/taskblocks/taskblocks.jar
+JAVA_CMD=java
+
+type java > /dev/null
+if [ $? = 0 ]; then
+  JAVA_CMD=java
+elif [ -x $JAVA_HOME/bin/jar ]; then
+  JAVA_CMD=$JAVA_HOME/bin/java
+else
+  echo "Cannot find 'java' executable"
+  exit 1
+fi
+exec "$JAVA_CMD" -jar "$TB_JARFILE" "$@"
+  

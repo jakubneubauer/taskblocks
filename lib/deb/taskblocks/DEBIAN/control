@@ -1,0 +1,7 @@
+Package: taskblocks
+Version: APPVERSION
+Section: contrib/utils
+Priority: optional
+Architecture: all
+Maintainer: Jakub Neubauer
+Description: TaskBlocks is simple application to help planning tasks, where tasks planning is as simple as dragging and shuffling wooden blocks on the table.
